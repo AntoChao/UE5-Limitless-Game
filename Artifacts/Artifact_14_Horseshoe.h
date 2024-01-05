@@ -7,7 +7,7 @@
 #include "Artifact_14_Horseshoe.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AArtifact_14_Horseshoe: public AGeneralPickUpArtifact
+class LIMITLESS_API AArtifact_14_Horseshoe: public AGeneralPickUpArtifact
 {
 	GENERATED_BODY()
 	
@@ -18,10 +18,6 @@ public:
 	// linear scaling
 	float ratio  = 1.25f;
 	
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
 public:	
 	virtual void ApplyPickUpEffect(AMain* MainCharacter) override;
 	virtual void EliminatePickUpEffect(AMain* MainCharacter) override;

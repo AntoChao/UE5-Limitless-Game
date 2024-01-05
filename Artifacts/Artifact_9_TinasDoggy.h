@@ -7,7 +7,7 @@
 #include "Artifact_9_TinasDoggy.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AArtifact_9_TinasDoggy: public AGeneralPickUpArtifact
+class LIMITLESS_API AArtifact_9_TinasDoggy: public AGeneralPickUpArtifact
 {
 	GENERATED_BODY()
 	
@@ -18,10 +18,6 @@ public:
 	// linear scaling
 	float ratio  = 0.15f;
 	
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
 public:	
 	virtual void ApplyPickUpEffect(AMain* MainCharacter) override;
 	virtual void EliminatePickUpEffect(AMain* MainCharacter) override;

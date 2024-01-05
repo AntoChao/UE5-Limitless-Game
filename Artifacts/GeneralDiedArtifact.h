@@ -7,7 +7,7 @@
 #include "GeneralDiedArtifact.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AGeneralDiedArtifact : public AGeneralArtifact
+class LIMITLESS_API AGeneralDiedArtifact : public AGeneralArtifact
 {
 	GENERATED_BODY()
 	

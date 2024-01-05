@@ -7,7 +7,7 @@
 #include "Artifact_28_TNT.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AArtifact_28_TNT: public AGeneralKillFeedBackArtifact
+class LIMITLESS_API AArtifact_28_TNT: public AGeneralKillFeedBackArtifact
 {
 	GENERATED_BODY()
 	
@@ -20,10 +20,6 @@ public:
 	float ratioDamage = 10.0f;
 	
 	TArray<AActor*> ignoredActors;
-
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
 
 public:	
 	virtual UData_KillFeedBackInfo* ApplyKillFeedBackEffect(class UData_KillFeedBackInfo* KillInfo, AActor* Enemy) override;

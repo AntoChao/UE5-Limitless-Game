@@ -7,7 +7,7 @@
 #include "Artifact_38_Totem.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AArtifact_38_Totem : public AGeneralPickUpArtifact
+class LIMITLESS_API AArtifact_38_Totem : public AGeneralPickUpArtifact
 {
 	GENERATED_BODY()
 	
@@ -16,9 +16,6 @@ public:
 	AArtifact_38_Totem();
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
 	float ratio = 0.2;
 
 public:	

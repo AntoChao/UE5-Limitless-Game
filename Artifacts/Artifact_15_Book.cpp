@@ -5,33 +5,19 @@
 #include "../Main.h"
 
 // Sets default values
-AArtifact_15_Book::AArtifact_15_Book()
-{
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-
+AArtifact_15_Book::AArtifact_15_Book() {
+ 	
 	ThisArtifactType = EArtifactType::EPickUp;
 }
 
-// Called when the game starts or when spawned
-void AArtifact_15_Book::BeginPlay()
-{
-	Super::BeginPlay();
-
-	//SetArtifact(EPickUp);
-}
-
-void AArtifact_15_Book::ApplyPickUpEffect(AMain* MainCharacter)
-{
+void AArtifact_15_Book::ApplyPickUpEffect(AMain* MainCharacter) {
 	MainCharacter->UpdateCharacterPowerUp(ratio);
 }
 
-void AArtifact_15_Book::EliminatePickUpEffect(AMain* MainCharacter)
-{
+void AArtifact_15_Book::EliminatePickUpEffect(AMain* MainCharacter) {
 	MainCharacter->UpdateCharacterPowerUp(1 / ratio);
 }
 
-void AArtifact_15_Book::UpdateRatio(float newRatio)
-{
+void AArtifact_15_Book::UpdateRatio(float newRatio) {
 	ratio = newRatio;
 }

@@ -7,7 +7,7 @@
 #include "Artifact_30_Heart.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AArtifact_30_Heart: public AGeneralDiedArtifact
+class LIMITLESS_API AArtifact_30_Heart: public AGeneralDiedArtifact
 {
 	GENERATED_BODY()
 	
@@ -17,10 +17,6 @@ public:
 
 	// linear scaling
 	float revivePercentageHealth = 0.2;
-
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
 
 public:	
 	virtual bool ApplyDiedEffect(AMain* PlayerMain) override;

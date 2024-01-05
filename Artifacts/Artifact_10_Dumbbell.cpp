@@ -6,33 +6,18 @@
 #include "../Main.h"
 
 // Sets default values
-AArtifact_10_Dumbbell::AArtifact_10_Dumbbell()
-{
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-
+AArtifact_10_Dumbbell::AArtifact_10_Dumbbell() {
 	ThisArtifactType = EArtifactType::EPickUp;
 }
 
-// Called when the game starts or when spawned
-void AArtifact_10_Dumbbell::BeginPlay()
-{
-	Super::BeginPlay();
-
-	//SetArtifact(Attack);
-}
-
-void AArtifact_10_Dumbbell::ApplyPickUpEffect(AMain* MainCharacter)
-{
+void AArtifact_10_Dumbbell::ApplyPickUpEffect(AMain* MainCharacter) {
 	MainCharacter->UpdateMaxHealth(ratio, 0.0f);
 }
 
-void AArtifact_10_Dumbbell::EliminatePickUpEffect(AMain* MainCharacter)
-{
+void AArtifact_10_Dumbbell::EliminatePickUpEffect(AMain* MainCharacter) {
 	MainCharacter->UpdateMaxHealth(-ratio, 0.0f);
 }
 
-void AArtifact_10_Dumbbell::UpdateRatio(float newRatio)
-{
+void AArtifact_10_Dumbbell::UpdateRatio(float newRatio) {
 	ratio = newRatio;
 }

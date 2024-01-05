@@ -7,7 +7,7 @@
 #include "Artifact_35_Wings.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AArtifact_35_Wings : public AGeneralPickUpArtifact
+class LIMITLESS_API AArtifact_35_Wings : public AGeneralPickUpArtifact
 {
 	GENERATED_BODY()
 	
@@ -16,9 +16,6 @@ public:
 	AArtifact_35_Wings();
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-	
 	AMain* MainPlayer = nullptr;
 
 	bool ShouldBeEliminateEffect = false;

@@ -7,8 +7,7 @@
 #include "Artifact_11_Dice.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AArtifact_11_Dice: public AGeneralCostArtifact
-{
+class LIMITLESS_API AArtifact_11_Dice: public AGeneralCostArtifact {
 	GENERATED_BODY()
 	
 public:	
@@ -17,10 +16,6 @@ public:
 
 	// linear scaling
 	float ratio  = 1.0f;
-	
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
 
 public:	
 	virtual float ApplyFrenzyCostEffect(float FrenzyCost, AMain* MainCharacter) override;

@@ -8,8 +8,7 @@
 
 // lower the health == higher the damage
 UCLASS()
-class TRUEPROJECT2_API AArtifact_12_pumpkin: public AGeneralAttackArtifact
-{
+class LIMITLESS_API AArtifact_12_pumpkin: public AGeneralAttackArtifact {
 	GENERATED_BODY()
 	
 public:	
@@ -18,10 +17,6 @@ public:
 
 	float MaxBoost = 10.0f;
 	float ratioToScale = 5.0f;
-
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
 
 public:	
 	virtual float ApplyAttackEffect(float deltaDamage, FHitResult EnemyHit, AMain* PlayerMain) override;

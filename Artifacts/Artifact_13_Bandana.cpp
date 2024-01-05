@@ -6,33 +6,18 @@
 #include "../Main.h"
 
 // Sets default values
-AArtifact_13_Bandana::AArtifact_13_Bandana()
-{
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-
+AArtifact_13_Bandana::AArtifact_13_Bandana() {
 	ThisArtifactType = EArtifactType::EPickUp;
 }
 
-// Called when the game starts or when spawned
-void AArtifact_13_Bandana::BeginPlay()
-{
-	Super::BeginPlay();
-
-	//SetArtifact(Attack);
-}
-
-void AArtifact_13_Bandana::ApplyPickUpEffect(AMain* MainCharacter)
-{
+void AArtifact_13_Bandana::ApplyPickUpEffect(AMain* MainCharacter) {
 	MainCharacter->UpdateDefaultMoveSpeed(ratio);
 }
 
-void AArtifact_13_Bandana::EliminatePickUpEffect(AMain* MainCharacter)
-{
+void AArtifact_13_Bandana::EliminatePickUpEffect(AMain* MainCharacter) {
 	MainCharacter->UpdateDefaultMoveSpeed(1 / ratio);
 }
 
-void AArtifact_13_Bandana::UpdateRatio(float newRatio)
-{
+void AArtifact_13_Bandana::UpdateRatio(float newRatio) {
 	ratio = newRatio;
 }

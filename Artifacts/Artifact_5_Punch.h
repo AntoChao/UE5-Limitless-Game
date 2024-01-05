@@ -7,7 +7,7 @@
 #include "Artifact_5_Punch.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AArtifact_5_Punch : public AGeneralAttackArtifact
+class LIMITLESS_API AArtifact_5_Punch : public AGeneralAttackArtifact
 {
 	GENERATED_BODY()
 	
@@ -17,10 +17,6 @@ public:
 
 	float ratio = 2.0f;
 	float distanceLimit = 50.0f;
-
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
 
 public:	
 	virtual float ApplyAttackEffect(float deltaDamage, FHitResult EnemyHit, AMain* PlayerMain) override;

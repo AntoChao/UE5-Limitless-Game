@@ -7,7 +7,7 @@
 #include "Artifact_23_Inversion.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AArtifact_23_Inversion: public AGeneralKillFeedBackArtifact
+class LIMITLESS_API AArtifact_23_Inversion: public AGeneralKillFeedBackArtifact
 {
 	GENERATED_BODY()
 	
@@ -19,10 +19,6 @@ public:
 	float frenzyRatio  = 1.5f;
 	float calmRatio = 1.5f;
 	
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
 public:	
 	virtual UData_KillFeedBackInfo* ApplyKillFeedBackEffect(class UData_KillFeedBackInfo* KillInfo, AActor* Enemy) override;
 

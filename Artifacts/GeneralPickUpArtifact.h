@@ -7,7 +7,7 @@
 #include "GeneralPickUpArtifact.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AGeneralPickUpArtifact : public AGeneralArtifact
+class LIMITLESS_API AGeneralPickUpArtifact : public AGeneralArtifact
 {
 	GENERATED_BODY()
 	

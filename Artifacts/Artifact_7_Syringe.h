@@ -7,20 +7,12 @@
 #include "Artifact_7_Syringe.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AArtifact_7_Syringe : public AActor
+class LIMITLESS_API AArtifact_7_Syringe : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
 	// Sets default values for this actor's properties
 	AArtifact_7_Syringe();
-
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
 
 };

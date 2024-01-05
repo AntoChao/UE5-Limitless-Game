@@ -7,7 +7,7 @@
 #include "Artifact_15_Book.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AArtifact_15_Book : public AGeneralPickUpArtifact
+class LIMITLESS_API AArtifact_15_Book : public AGeneralPickUpArtifact
 {
 	GENERATED_BODY()
 	
@@ -16,10 +16,6 @@ public:
 	AArtifact_15_Book();
 
 	float ratio = 1.2f;
-
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
 
 public:	
 	virtual void ApplyPickUpEffect(AMain* MainCharacter) override;

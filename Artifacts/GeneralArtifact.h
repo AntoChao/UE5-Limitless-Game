@@ -33,7 +33,7 @@ enum class EArtifactRarity
 };
 
 UCLASS()
-class TRUEPROJECT2_API AGeneralArtifact : public AActor
+class LIMITLESS_API AGeneralArtifact : public AActor
 {
 	GENERATED_BODY()
 	
@@ -83,12 +83,6 @@ public:
 		void OnOverlapBegin(class UPrimitiveComponent* OverlappedComp,
 			class AActor* OtherActor, class UPrimitiveComponent* OtherComp,
 			int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-
-	UFUNCTION()
-		// declare overlap end function
-		void OnOverlapEnd(class UPrimitiveComponent* OverlappedComp,
-			class AActor* OtherActor, class UPrimitiveComponent* OtherComp,
-			int32 OtherBodyIndex);
 
 	// Artifact for display
 	UFUNCTION(BlueprintCallable, Category = "Display Stat")

@@ -7,35 +7,23 @@
 #include "../DataContainer/data_killfeedbackinfo.h"
 
 // Sets default values
-AArtifact_23_Inversion::AArtifact_23_Inversion()
-{
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-
+AArtifact_23_Inversion::AArtifact_23_Inversion() {
+ 	
 	ThisArtifactType = EArtifactType::EKillFeedBack;
 }
 
-// Called when the game starts or when spawned
-void AArtifact_23_Inversion::BeginPlay()
-{
-	Super::BeginPlay();
-
-	//SetArtifact(Attack);
-}
-
-UData_KillFeedBackInfo* AArtifact_23_Inversion::ApplyKillFeedBackEffect(class UData_KillFeedBackInfo* KillInfo, AActor* Enemy)
-{
-	KillInfo->UpdateFrenzyReward(frenzyRatio);
-	KillInfo->UpdateCalmReward(calmRatio);
-
+UData_KillFeedBackInfo* AArtifact_23_Inversion::ApplyKillFeedBackEffect(class UData_KillFeedBackInfo* KillInfo, AActor* Enemy) {
+	if (IsValid(KillInfo)) {
+		KillInfo->UpdateFrenzyReward(frenzyRatio);
+		KillInfo->UpdateCalmReward(calmRatio);
+	}
+	
 	return KillInfo;
 }
 
-void AArtifact_23_Inversion::UpdateFrenzyRatio(float newRatio)
-{
+void AArtifact_23_Inversion::UpdateFrenzyRatio(float newRatio) {
 	frenzyRatio = newRatio;
 }
-void AArtifact_23_Inversion::UpdateCalmRatio(float newRatio)
-{
+void AArtifact_23_Inversion::UpdateCalmRatio(float newRatio) {
 	calmRatio = newRatio;
 }

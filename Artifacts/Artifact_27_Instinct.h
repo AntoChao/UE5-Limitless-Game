@@ -7,7 +7,7 @@
 #include "Artifact_27_Instinct.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AArtifact_27_Instinct: public AGeneralDefenseArtifact
+class LIMITLESS_API AArtifact_27_Instinct: public AGeneralDefenseArtifact
 {
 	GENERATED_BODY()
 	
@@ -18,10 +18,6 @@ public:
 	// an max value
 	float MaxRatioBoost = 10.0f;
 	float ratioToSpeed = 3.0f;
-
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
 
 public:	
 	virtual float ApplyDefenseEffect(float deltaDamage, AMain* PlayerMain) override;

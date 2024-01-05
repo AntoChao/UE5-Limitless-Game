@@ -7,7 +7,7 @@
 #include "Artifact_4_BoxingGlove.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AArtifact_4_BoxingGlove : public AGeneralAttackArtifact
+class LIMITLESS_API AArtifact_4_BoxingGlove : public AGeneralAttackArtifact
 {
 	GENERATED_BODY()
 	
@@ -16,10 +16,6 @@ public:
 	AArtifact_4_BoxingGlove();
 
 	float ratio = 1.7f;
-
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
 
 public:	
 	virtual float ApplyAttackEffect(float deltaDamage, FHitResult EnemyHit, AMain* PlayerMain) override;

@@ -7,8 +7,7 @@
 #include "Artifact_37_Drugs.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AArtifact_37_Drugs : public AGeneralAttackArtifact
-{
+class LIMITLESS_API AArtifact_37_Drugs : public AGeneralAttackArtifact {
 	GENERATED_BODY()
 	
 public:	
@@ -16,10 +15,6 @@ public:
 	AArtifact_37_Drugs();
 
 	float ratio = 2.0f;
-
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
 
 public:	
 		virtual float ApplyAttackEffect(float deltaDamage, FHitResult EnemyHit, AMain* PlayerMain) override;

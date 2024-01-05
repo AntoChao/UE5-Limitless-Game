@@ -7,7 +7,7 @@
 #include "GeneralCostArtifact.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AGeneralCostArtifact: public AGeneralArtifact
+class LIMITLESS_API AGeneralCostArtifact: public AGeneralArtifact
 {
 	GENERATED_BODY()
 	

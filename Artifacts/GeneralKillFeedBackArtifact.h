@@ -7,7 +7,7 @@
 #include "GeneralKillFeedBackArtifact.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AGeneralKillFeedBackArtifact : public AGeneralArtifact
+class LIMITLESS_API AGeneralKillFeedBackArtifact : public AGeneralArtifact
 {
 	GENERATED_BODY()
 	

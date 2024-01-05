@@ -7,7 +7,7 @@
 #include "Artifact_33_Contract.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AArtifact_33_Contract : public AGeneralPickUpArtifact
+class LIMITLESS_API AArtifact_33_Contract : public AGeneralPickUpArtifact
 {
 	GENERATED_BODY()
 	
@@ -16,8 +16,6 @@ public:
 	AArtifact_33_Contract();
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
 	float ratio = 2.0f;
 
 public:	

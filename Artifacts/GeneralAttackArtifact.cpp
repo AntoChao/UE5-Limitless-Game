@@ -6,23 +6,20 @@
 #include "../All_Enemies/EnemyClass.h"
 
 // Sets default values
-AGeneralAttackArtifact::AGeneralAttackArtifact()
-{
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+AGeneralAttackArtifact::AGeneralAttackArtifact() {
+ 	
 	PrimaryActorTick.bCanEverTick = true;
 
 	ThisArtifactType = EArtifactType::EAttack;
 }
 
 // Called when the game starts or when spawned
-void AGeneralAttackArtifact::BeginPlay()
-{
+void AGeneralAttackArtifact::BeginPlay() {
 	Super::BeginPlay();
 	
 	SetArtifact(EArtifactType::EAttack);
 }
 
-float AGeneralAttackArtifact::ApplyAttackEffect(float deltaDamage, FHitResult EnemyHit, AMain* PlayerMain)
-{
+float AGeneralAttackArtifact::ApplyAttackEffect(float deltaDamage, FHitResult EnemyHit, AMain* PlayerMain) {
 	return deltaDamage;
 }

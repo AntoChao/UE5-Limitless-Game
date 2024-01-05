@@ -7,7 +7,7 @@
 #include "Artifact_40_Fugu.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AArtifact_40_Fugu : public AGeneralPickUpArtifact
+class LIMITLESS_API AArtifact_40_Fugu : public AGeneralPickUpArtifact
 {
 	GENERATED_BODY()
 	
@@ -16,8 +16,6 @@ public:
 	AArtifact_40_Fugu();
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
 	float ratio = 2.0f;
 
 	AMain* MainPlayer = nullptr;

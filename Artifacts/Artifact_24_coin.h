@@ -8,7 +8,7 @@
 
 // lower the health == higher the damage
 UCLASS()
-class TRUEPROJECT2_API AArtifact_24_Coin: public AGeneralAttackArtifact
+class LIMITLESS_API AArtifact_24_Coin: public AGeneralAttackArtifact
 {
 	GENERATED_BODY()
 	
@@ -20,10 +20,6 @@ public:
 	float generateCalmProb = 5.0f;
 	
 	float ratio = 5.0f;
-
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
 
 public:	
 	virtual float ApplyAttackEffect(float deltaDamage, FHitResult EnemyHit, AMain* PlayerMain) override;

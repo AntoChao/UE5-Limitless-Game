@@ -5,33 +5,19 @@
 #include "../Main.h"
 
 // Sets default values
-AArtifact_3_Card::AArtifact_3_Card()
-{
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-
+AArtifact_3_Card::AArtifact_3_Card() {
+ 	
 	ThisArtifactType = EArtifactType::EPickUp;
 }
 
-// Called when the game starts or when spawned
-void AArtifact_3_Card::BeginPlay()
-{
-	Super::BeginPlay();
-
-	//SetArtifact(EPickUp);
-}
-
-void AArtifact_3_Card::ApplyPickUpEffect(AMain* MainCharacter)
-{
+void AArtifact_3_Card::ApplyPickUpEffect(AMain* MainCharacter) {
 	MainCharacter->UpdateCharacterCritChance(ratio);
 }
 
-void AArtifact_3_Card::EliminatePickUpEffect(AMain* MainCharacter)
-{
+void AArtifact_3_Card::EliminatePickUpEffect(AMain* MainCharacter) {
 	MainCharacter->UpdateCharacterCritChance(1 / ratio);
 }
 
-void AArtifact_3_Card::UpdateRatio(float newRatio)
-{
+void AArtifact_3_Card::UpdateRatio(float newRatio) {
 	ratio = newRatio;
 }

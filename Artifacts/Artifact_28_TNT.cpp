@@ -8,24 +8,11 @@
 #include "Kismet/GameplayStatics.h"
 
 // Sets default values
-AArtifact_28_TNT::AArtifact_28_TNT()
-{
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-
+AArtifact_28_TNT::AArtifact_28_TNT() {
 	ThisArtifactType = EArtifactType::EKillFeedBack;
 }
 
-// Called when the game starts or when spawned
-void AArtifact_28_TNT::BeginPlay()
-{
-	Super::BeginPlay();
-
-	//SetArtifact(Attack);
-}
-
-UData_KillFeedBackInfo* AArtifact_28_TNT::ApplyKillFeedBackEffect(class UData_KillFeedBackInfo* KillInfo, AActor* Enemy)
-{
+UData_KillFeedBackInfo* AArtifact_28_TNT::ApplyKillFeedBackEffect(class UData_KillFeedBackInfo* KillInfo, AActor* Enemy) {
 	/* maybe getWorldDoesNotWork
 	* may add main to ignore
 	*/

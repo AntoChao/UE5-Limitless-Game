@@ -7,7 +7,7 @@
 #include "Artifact_10_Dumbbell.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AArtifact_10_Dumbbell : public AGeneralPickUpArtifact
+class LIMITLESS_API AArtifact_10_Dumbbell : public AGeneralPickUpArtifact
 {
 	GENERATED_BODY()
 	
@@ -17,10 +17,6 @@ public:
 
 	// linear scaling
 	float ratio  = 25.0f;
-	
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
 
 public:	
 	virtual void ApplyPickUpEffect(AMain* MainCharacter) override;

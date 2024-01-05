@@ -7,7 +7,7 @@
 #include "Artifact_21_Bomb.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AArtifact_21_Bomb : public AGeneralAttackArtifact
+class LIMITLESS_API AArtifact_21_Bomb : public AGeneralAttackArtifact
 {
 	GENERATED_BODY()
 	
@@ -16,10 +16,6 @@ public:
 	AArtifact_21_Bomb();
 
 	float ratio = 2.0f;
-
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
 
 public:	
 	virtual float ApplyAttackEffect(float deltaDamage, FHitResult EnemyHit, AMain* PlayerMain) override;

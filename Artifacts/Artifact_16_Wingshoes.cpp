@@ -5,33 +5,18 @@
 #include "../Main.h"
 
 // Sets default values
-AArtifact_16_Wingshoes::AArtifact_16_Wingshoes()
-{
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-
+AArtifact_16_Wingshoes::AArtifact_16_Wingshoes() {
 	ThisArtifactType = EArtifactType::EPickUp;
 }
 
-// Called when the game starts or when spawned
-void AArtifact_16_Wingshoes::BeginPlay()
-{
-	Super::BeginPlay();
-
-	//SetArtifact(EPickUp);
-}
-
-void AArtifact_16_Wingshoes::ApplyPickUpEffect(AMain* MainCharacter)
-{
+void AArtifact_16_Wingshoes::ApplyPickUpEffect(AMain* MainCharacter) {
 	MainCharacter->UpdateCharacterPowerUp(ratio);
 }
 
-void AArtifact_16_Wingshoes::EliminatePickUpEffect(AMain* MainCharacter)
-{
+void AArtifact_16_Wingshoes::EliminatePickUpEffect(AMain* MainCharacter) {
 	MainCharacter->UpdateCharacterPowerUp(1 / ratio);
 }
 
-void AArtifact_16_Wingshoes::UpdateRatio(float newRatio)
-{
+void AArtifact_16_Wingshoes::UpdateRatio(float newRatio) {
 	ratio = newRatio;
 }

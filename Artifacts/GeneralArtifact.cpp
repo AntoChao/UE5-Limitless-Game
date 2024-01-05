@@ -8,9 +8,8 @@
 #include "../Main.h"
 
 // Sets default values
-AGeneralArtifact::AGeneralArtifact()
-{
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+AGeneralArtifact::AGeneralArtifact() {
+	
 	PrimaryActorTick.bCanEverTick = true;
 
 	// Use a sphere as a simple collision representation
@@ -31,21 +30,17 @@ AGeneralArtifact::AGeneralArtifact()
 	Body->CastShadow = false;
 	Body->SetRelativeLocation(FVector(0.f, 0.f, 0.f));
 }
-
 // Called when the game starts or when spawned
-void AGeneralArtifact::BeginPlay()
-{
+void AGeneralArtifact::BeginPlay() {
 	Super::BeginPlay();
 	
 	// overlap event
-	CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &AGeneralArtifact::OnOverlapBegin);
-	CollisionComp->OnComponentEndOverlap.AddDynamic(this, &AGeneralArtifact::OnOverlapEnd);
+	CollisionComp->OnComponentBeginOverlap.AddUniqueDynamic(this, &AGeneralArtifact::OnOverlapBegin);
 
 }
 
 // Called every frame
-void AGeneralArtifact::Tick(float DeltaTime)
-{
+void AGeneralArtifact::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 
 	// Rotate the actor on the XY plane
@@ -56,33 +51,27 @@ void AGeneralArtifact::Tick(float DeltaTime)
 
 }
 
-void AGeneralArtifact::SetArtifact(EArtifactType AArtifactType)
-{
+void AGeneralArtifact::SetArtifact(EArtifactType AArtifactType) {
 	ThisArtifactType = AArtifactType;
 }
 
-EArtifactType AGeneralArtifact::GetArtifact()
-{
+EArtifactType AGeneralArtifact::GetArtifact() {
 	return ThisArtifactType;
 }
 
 void AGeneralArtifact::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp,
 	class AActor* OtherActor, class UPrimitiveComponent* OtherComp,
-	int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	if ((OtherActor != nullptr) && (OtherActor != this) && (OtherComp != nullptr))
-	{
+	int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
+	if ((OtherActor != nullptr) && (OtherActor != this) && (OtherComp != nullptr)) {
 		AMain* player = Cast<AMain>(OtherActor);
 
-		if (IsValid(player) && !player->isMainDetecting())
-		{
+		if (IsValid(player) && !player->isMainDetecting()) {
 			// create a delta same artifact which sent to main
 
 			UClass* ActorClass = this->GetClass();
 			AActor* DuplicatedActor = nullptr;
 			
-			if (ActorClass)
-			{
+			if (ActorClass) {
 				DuplicatedActor = NewObject<AActor>(GetTransientPackage(), ActorClass);
 			}
 			
@@ -90,27 +79,16 @@ void AGeneralArtifact::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp,
 			// player->GetArtifact(this);
 			
 			Destroy();
-			
 		}
 	}
 }
 
-void AGeneralArtifact::OnOverlapEnd(class UPrimitiveComponent* OverlappedComp,
-	class AActor* OtherActor, class UPrimitiveComponent* OtherComp,
-	int32 OtherBodyIndex)
-{
-	// nothing
-}
-
-UTexture2D* AGeneralArtifact::GetArtifactImage()
-{
+UTexture2D* AGeneralArtifact::GetArtifactImage() {
 	return ArtifactImage;
 }
-FString AGeneralArtifact::GetArtifactName()
-{
+FString AGeneralArtifact::GetArtifactName() {
 	return ArtifactName;
 }
-FString AGeneralArtifact::GetArtifactDiscription()
-{
+FString AGeneralArtifact::GetArtifactDiscription() {
 	return ArtifactDiscription;
 }

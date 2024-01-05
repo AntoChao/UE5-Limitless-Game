@@ -7,7 +7,7 @@
 #include "Artifact_17_Cloak.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AArtifact_17_Cloak: public AGeneralDefenseArtifact
+class LIMITLESS_API AArtifact_17_Cloak: public AGeneralDefenseArtifact
 {
 	GENERATED_BODY()
 	
@@ -18,10 +18,6 @@ public:
 	// linear scaling
 	float ratio  = 1.25f;
 	
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
 public:	
 	virtual float ApplyDefenseEffect(float deltaDamage, AMain* PlayerMain) override;
 	void UpdateRatio(float newRatio);
