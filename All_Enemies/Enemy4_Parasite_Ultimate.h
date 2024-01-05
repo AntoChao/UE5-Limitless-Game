@@ -7,7 +7,7 @@
 #include "Enemy4_Parasite_Ultimate.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AEnemy4_Parasite_Ultimate: public AEnemyClass
+class LIMITLESS_API AEnemy4_Parasite_Ultimate: public AEnemyClass
 {
 	GENERATED_BODY()
 

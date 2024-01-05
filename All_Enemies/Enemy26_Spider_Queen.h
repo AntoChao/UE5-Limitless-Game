@@ -8,7 +8,7 @@
 #include "Enemy26_Spider_Queen.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AEnemy26_Spider_Queen : public AEnemyClass
+class LIMITLESS_API AEnemy26_Spider_Queen : public AEnemyClass
 {
 	GENERATED_BODY()
 
@@ -17,19 +17,18 @@ public:
 	AEnemy26_Spider_Queen();
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
 	// Basic Stats
-		/*Basic Attack*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats Need To Set")
-		float AttackDistance;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats Need To Set")
-		bool IsInDistance = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats Need To Set")
 		UAnimMontage* AnimMontage_JumpStandAttack;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats Need To Set")
 		UAnimMontage* AnimMontage_JumpLaunchAttack;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats Need To Set")
+		float StunTime = 5.0f;
+	UFUNCTION(BlueprintCallable, Category = "BasicAttack")
+		void BasicAttackStun();
+	UFUNCTION(BlueprintCallable, Category = "BasicAttack")
+		void BasicAttackDealDamage();
 
 	UFUNCTION(BlueprintCallable, Category = "BasicAttack")
 		void SpawnSpiderBullet();
@@ -43,13 +42,4 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Body Control")
 		FName Weapon_FirePoint_Socket = FName("Socket_Fire");
 
-
-public:
-	// basic attack -> walk close to player and attack the ground
-	virtual void BasicAttack() override;
-	virtual void BasicAttackFinished() override;
-	virtual void PlayAnimBasicAttack() override;
-
-	// ability one -> fire a web bullet
-	virtual void Ability1() override;
 };

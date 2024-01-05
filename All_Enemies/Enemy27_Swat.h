@@ -7,7 +7,7 @@
 #include "Enemy27_Swat.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AEnemy27_Swat : public AEnemyClass
+class LIMITLESS_API AEnemy27_Swat : public AEnemyClass
 {
 	GENERATED_BODY()
 

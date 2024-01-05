@@ -22,35 +22,6 @@ AEnemy22_Cultist::AEnemy22_Cultist()
 
 }
 
-// Called when the game starts or when spawned
-void AEnemy22_Cultist::BeginPlay()
-{
-	Super::BeginPlay();
-	
-	// Inicialize all values
-	InitCharacHealth(100.0f);
-
-	SetRarity(EEnemyRarity::ENormal);
-
-	GeneralDistance = 2000.0f;
-
-	BasicAttackDistance = 500.0f;
-	AbilityOneDistance = 300.f;
-
-	Ability1Duration = 1.0f;
-
-}
-
-void AEnemy22_Cultist::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-}
-
-void AEnemy22_Cultist::BasicAttack()
-{
-	// only play one the animation
-	Super::BasicAttack();
-}
 
 // basic attack called in animation
 void AEnemy22_Cultist::SpawnCultist() {
@@ -65,30 +36,31 @@ void AEnemy22_Cultist::SpawnCultist() {
 
 	RandomLocation = RandomLocation + SpawnHeightOffset;
 
-	DrawDebugSphere (
-		GetWorld(), RandomLocation, 10.0f, 10, FColor::Yellow, false, 10.0f, 2, 10.0f
-	);
-
 	AEnemy22_Cultist* ACultist = GetWorld()->SpawnActor<AEnemy22_Cultist>(CultistClass,
 		RandomLocation, GetActorRotation(), ActorSpawnParams);
 }
 
-void AEnemy22_Cultist::Ability1()
-{
-	Super::Ability1();
-
+void AEnemy22_Cultist::DealSelfDamage() {
 	// Suicide, no need to pass an actual controller.
+	/* NO WORKING CUZ EMEMIES ONLY RECEIVED MAIN DAMAGE
 	UGameplayStatics::ApplyPointDamage(this, SelfDestoyDamage,
 		GetActorLocation(), EnemyHit,
-		nullptr, this, nullptr);
+		nullptr, this, nullptr);*/
+
+	ExtraDiedAction();
+	Destroy();
+
 }
 
-void AEnemy22_Cultist::ExtraDiedAction()
-{
-	Super::ExtraDiedAction();
-
+void AEnemy22_Cultist::ExtraDiedAction() {
 	SpawnSuicideExplotionNiagara();
 
 	// need to set collision as around player
 	DealDamage2Overlapped();
+
+	// eliminate the health bar
+	RemoveHealthBar();
+
+	// reward main
+	RewardMainCharacter();
 }

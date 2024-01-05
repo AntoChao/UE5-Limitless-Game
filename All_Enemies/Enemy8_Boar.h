@@ -7,7 +7,7 @@
 #include "Enemy8_Boar.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AEnemy8_Boar : public AEnemyClass
+class LIMITLESS_API AEnemy8_Boar : public AEnemyClass
 {
 	GENERATED_BODY()
 

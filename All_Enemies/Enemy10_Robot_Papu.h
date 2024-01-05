@@ -7,7 +7,7 @@
 #include "Enemy10_Robot_Papu.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AEnemy10_Robot_Papu : public AEnemyClass
+class LIMITLESS_API AEnemy10_Robot_Papu : public AEnemyClass
 {
 	GENERATED_BODY()
 
@@ -16,8 +16,6 @@ public:
 	AEnemy10_Robot_Papu();
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
 
 	//Basic Stats
 	UPROPERTY(EditAnywhere, Category = "Enemies")
@@ -74,6 +72,4 @@ protected:
 
 
 public:	
-	// Called every frame
-	// virtual void Tick(float DeltaTime) override;
 };

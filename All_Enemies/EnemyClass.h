@@ -16,6 +16,10 @@
 #include "../Decals/GeneralDecalActor.h"
 #include "../Common_Enums.h"
 
+// sound
+#include "Sound/SoundCue.h"
+#include "Components/AudioComponent.h"
+
 #include "EnemyClass.generated.h"
 
 /* Types
@@ -27,7 +31,7 @@
 
 
 UCLASS()
-class TRUEPROJECT2_API AEnemyClass : public AAllCharactersClass
+class LIMITLESS_API AEnemyClass : public AAllCharactersClass
 {
 	// Primate seccion
 	GENERATED_BODY()
@@ -37,7 +41,10 @@ public:
 	AEnemyClass();
 
 protected:
-	virtual void Tick(float DeltaTime) override;
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+
+	virtual void CustomTickFunction() override;
 
 	/** Sphere collision component */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BodyCollision")
@@ -54,6 +61,8 @@ protected:
 		class AMain* MainPlayerTarget;
 
 	// HealthBar
+	virtual void BeDetected() override;
+	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health Bar")
 		TSubclassOf<class AHealthBarActor> HealthBarActorClass;
 
@@ -78,7 +87,7 @@ protected:
 
 	// Called when the game starts or when spawned
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats Need To Set")
-		EEnemyRarity ItsRarity;
+		EEnemyRarity ItsRarity = EEnemyRarity::EUnknown;
 
 	/*
 	Parameters: all parameters bools for blackboard should not be part of the enemyclass, should has a function that call activating for the aiEnemyClassController
@@ -100,11 +109,17 @@ protected:
 
 	// Damage
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats Need To Set")
-		float EnemyBaseDamage;
+		float MaxEnemyBaseDamage = 5000.0f;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats Need To Set")
+		float EnemyBaseDamage = 10.0f;
+
+	UFUNCTION(BlueprintCallable, Category = "Enemy Damage")
+		void SetEnemyDamage(float modifier);
+
+	// Speed
 	// Take damage
 	virtual float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
-	virtual void ExtraDiedAction();
 	
 	UFUNCTION(BlueprintCallable, Category = "Hit Effect Control")
 		void TakeDamageReaction(float Damage, AActor* DamageCauser);
@@ -117,8 +132,14 @@ protected:
 		void SpawnFloatingHealthWidget(float Damage);
 
 	UFUNCTION(BlueprintCallable, Category = "Hit Effect Control")
-		EDamageColor GetFloatHealthColor(float Damage);
+		FTransform AddFloatingHealthOffset(FTransform FloatNumTrnas);
+	UFUNCTION(BlueprintCallable, Category = "Hit Effect Control")
+		FTransform AddFloatingHealthScale(float damage, FTransform FloatNumTrnas);
 
+	/*
+	UFUNCTION(BlueprintCallable, Category = "Hit Effect Control")
+		EDamageColor GetFloatHealthColor(float Damage);
+		*/
 	// save the damage amount
 	UFUNCTION(BlueprintCallable, Category = "Hit Effect Control")
 		void SaveTotalDamageAmount(float Damage);
@@ -155,8 +176,21 @@ protected:
 		void SpawnHitEffectDecal(FTransform SpawnTrans);
 
 	// rewards
-	class UData_KillFeedBackInfo* KillReward;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Kill Reward To Set")
+		class UData_KillFeedBackInfo* KillReward;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Kill Reward To Set")
+		float frenzyReward = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Kill Reward To Set")
+		float calmReward = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Kill Reward To Set")
+		float speedReward = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Kill Reward To Set")
+		float xpReward = 0.0f;
+
 	UPROPERTY(EditAnywhere, Category = "ArtifactToSpawn")
 		TSubclassOf<class AMiniWorld> AMiniWorldArtifact;
 
@@ -174,10 +208,15 @@ protected:
 	// for random location
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats Need To Set")
 		float GeneralDistance = 1000.0f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats NO Need To Set")
-		float MinimalDistance;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats Need To Set")
+		float MinimalDistance = 500.0f;
 	UFUNCTION(BlueprintCallable)
 		void CalculateMinimalDistance();
+
+	// Check if it is too close to enemy to change it behavior
+	UFUNCTION(BlueprintCallable)
+		void CheckMainTooClose();
+
 	// the distance to determinate if it able to attack
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats Need To Set")
 		float BasicAttackDistance = 1000.0f;
@@ -190,7 +229,7 @@ protected:
 
 	// Animation
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats Need To Set")
-		float PlayRate;
+		float PlayRate = 1.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats Need To Set")
 		UAnimMontage* AnimMontage_BasicAttack;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats Need To Set")
@@ -200,12 +239,25 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats Need To Set")
 		UAnimMontage* AnimMontage_Ability3;
 	
-	// All sounds and niagara should be part of animation
-
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-	virtual void CustomTickFunction() override;
+	// All sounds
+	// PROB USELESS
+	// basic attack sound 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Sound")
+		USoundCue* BasicAttackSoundCue;
+	UFUNCTION(BlueprintCallable, Category = "Enemy Sound")
+		void PlayBasicAttackSound();
+	
+	// ability sound
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Sound")
+		USoundCue* AbilityOneSoundCue;
+	UFUNCTION(BlueprintCallable, Category = "Enemy Sound")
+		void PlayAbilityOneSound();
+	
+	// take hit reaction sound
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy Sound")
+		USoundCue* HitReactSoundCue;
+	UFUNCTION(BlueprintCallable, Category = "Enemy Sound")
+		void PlayHitReactSound();
 
 public:	
 
@@ -216,39 +268,26 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Health Bar Visibility")
 		void SetHealthBarNotVisible();
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "Enemy Rarity")
 		void SetRarity(EEnemyRarity ARarity);
-	UFUNCTION()
+
+	UFUNCTION(BlueprintCallable, Category = "Enemy Rarity")
 		EEnemyRarity GetRarity();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats Need To Set")
-		float EnemyMovementSpeed = 300.0f;
-	UFUNCTION(BlueprintCallable)
-		void SetEnemyDefaultSpeed();
+	// Difficulty and day buff/ debuff
+	UFUNCTION(BlueprintCallable, Category = "Enemy Buff")
+		void GetDifficultBuff(float modifier);
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		float MinHeight;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		float MaxHeight;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		float LimitHeight;
+	UFUNCTION(BlueprintCallable, Category = "Enemy Buff")
+		void GetNightBuff(float modifier);
+	UFUNCTION(BlueprintCallable, Category = "Enemy Buff")
+		void GetMorningDebuff(float modifier);
 
-	void SetHeightLimit();
+	// Take damage
+	UFUNCTION(BlueprintCallable, Category = "Enemy Buff")
+		virtual void ExtraDiedAction();
 
 	// ai controller stuff
-	// 
-	
-	
-	/* AI Behavior
-	3 types:
-		melee -> just chase main
-		tactic -> random location -> try to shot -> reposition -> random location
-			(SHOULD MOVE FAST)
-		surrond -> get close to main but always in distance shotting
-				-> like "chasing" in distance
-	*/
-	// Random location nearby main and self
-	// BUT IT SHOULD BE RESET AFTER X SEGS
 	UFUNCTION(BlueprintCallable, Category = "AI Control")
 		float GetGeneralDistance();
 
@@ -272,7 +311,7 @@ public:
 
 	// based on a point and distance, generate a random location around main player
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI Control")
-		int MaxRandomTryTimes = 100; /*only try 100 times*/
+		int MaxRandomTryTimes = 10; /*only try 100 times*/
 	
 	UFUNCTION(BlueprintCallable, Category = "AI Control")
 		FVector GetRandLocation(FVector InitLocation, FVector TargetLocation, 
@@ -343,11 +382,11 @@ public:
 	// basic attack is just a animation which fire a notifier which call function 
 	// to deal damage to overlapped actors
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI BasicAttack")
-		bool IsAttacking;
+		bool IsAttacking = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI BasicAttack")
 		FTimerHandle BasicAttackTimer;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI BasicAttack")
-		float BasicAttackDuration; // the animation montage duration
+		float BasicAttackDuration = 3.0f; // the animation montage duration
 	// Prepare -> show necesaries indicator for the action
 	UFUNCTION(BlueprintCallable, Category = "AI BasicAttack")
 		virtual void PrepareBasicAttack();
@@ -361,9 +400,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI Ability One")
 		FTimerHandle Ability1UsageTimer;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI Ability One")
-		bool IsUsingAbility1;
+		bool IsUsingAbility1 = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI Ability One")
-		float Ability1Duration;
+		float Ability1Duration = 1.0f;
 	
 	UFUNCTION(BlueprintCallable, Category = "AI Ability One")
 		virtual void PrepareAbility1();
@@ -376,9 +415,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI Ability Two")
 		FTimerHandle Ability2UsageTimer;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI Ability Two")
-		bool IsUsingAbility2;
+		bool IsUsingAbility2 = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI Ability Two")
-		float Ability2Duration;
+		float Ability2Duration = 1.0f;
 	
 	UFUNCTION(BlueprintCallable, Category = "AI Ability Two")
 		virtual void PrepareAbility2();
@@ -391,9 +430,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI Ability Three")
 		FTimerHandle Ability3UsageTimer;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI Ability Three")
-		bool IsUsingAbility3;
+		bool IsUsingAbility3 = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AI Ability Three")
-		float Ability3Duration;
+		float Ability3Duration = 1.0f;
 
 	UFUNCTION(BlueprintCallable, Category = "AI Ability Three")
 		virtual void PrepareAbility3();
@@ -440,30 +479,16 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Animation")
 		virtual void PlayAnimAbilityThree();
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "Animation")
 		void OnMontageBasicAttackEnded(UAnimMontage* Montage, bool bInterrupted);
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "Animation")
 		void OnMontageOneEnded(UAnimMontage* Montage, bool bInterrupted);
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "Animation")
 		void OnMontageTwoEnded(UAnimMontage* Montage, bool bInterrupted);
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable, Category = "Animation")
 		void OnMontageThreeEnded(UAnimMontage* Montage, bool bInterrupted);
 
 	// reward is directly to main
-	UFUNCTION()
-	void RewardMainCharacter();
-	
-	UFUNCTION()
-		void testing();
-
-	// Special Movement Of Enemy
-	UPROPERTY(EditAnywhere, Category = "Timeline")
-		class UCurveVector* MoveCurveVector;
-	UPROPERTY(EditAnywhere, Category = "Timeline")
-		class UCurveFloat* MoveCurveFloat;
-	FTimeline CustomMoveTimeline;
-	UFUNCTION(BlueprintCallable)
-		virtual void CustomMoveTo();
-	UFUNCTION()
-		virtual void CustomMoving(float Value);
+	UFUNCTION(BlueprintCallable, Category = "Reward")
+		void RewardMainCharacter();
 };

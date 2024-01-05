@@ -7,7 +7,7 @@
 #include "BasicEnemy.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API ABasicEnemy : public AEnemyClass
+class LIMITLESS_API ABasicEnemy : public AEnemyClass
 {
 	GENERATED_BODY()
 

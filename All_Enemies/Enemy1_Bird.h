@@ -7,7 +7,7 @@
 #include "Enemy1_Bird.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AEnemy1_Bird : public AEnemyClass
+class LIMITLESS_API AEnemy1_Bird : public AEnemyClass
 {
 	GENERATED_BODY()
 
@@ -16,13 +16,6 @@ public:
 	AEnemy1_Bird();
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-	virtual void CustomTickFunction() override;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Mesh)
-		bool bFlyUp;
-
 	//Basic Stats
 	FHitResult EnemyHit;
 	
@@ -66,10 +59,7 @@ public:
 
 	virtual void BasicAttack() override;
 	virtual void Ability1() override;
-	virtual bool IsAbleToUseBasicAttack() override;
-	virtual bool IsAbleToUseAbility1() override;
 
 	void BasicAttackFinished() override;
-	void Ability1Finished() override;
 
 };

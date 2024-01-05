@@ -39,10 +39,6 @@ void AEnemy8_Boar::BeginPlay()
 	Ability1Duration = 1.0f;
 	Ability2Duration = 1.0f;
 
-	MinHeight = 300.0f;
-	MaxHeight = 350.0f;
-	bFlyUp = true;
-
 	FlySpeed = 900.0f;
 	DashSpeed = 3000.0f;
 
@@ -52,31 +48,6 @@ void AEnemy8_Boar::BeginPlay()
 void AEnemy8_Boar::CustomTickFunction()
 {
 	Super::CustomTickFunction();
-	
-	if (GetActorLocation().Z <= LimitHeight)
-	{
-		bFlyUp = true;
-	}
-	else
-	{
-		bFlyUp = false;
-	}
-
-	FString miau = FString::SanitizeFloat(CharacterSpeed);
-	GEngine->AddOnScreenDebugMessage(-1, 2.0, FColor::Red, *miau);
-
-	/*
-	if (IsAbleToUseAbility1())
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, TEXT("Able to use Ability 1"));
-	}
-	if (IsAbleToUseAbility2())
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, TEXT("Able to use Ability 2"));
-	}
-	GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, TEXT("----------------------"));
-	*/
-
 }
 
 bool AEnemy8_Boar::IsAbleToUseAbility1()

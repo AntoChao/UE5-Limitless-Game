@@ -7,7 +7,7 @@
 #include "Enemy11_Robot_Executor.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AEnemy11_Robot_Executor : public AEnemyClass
+class LIMITLESS_API AEnemy11_Robot_Executor : public AEnemyClass
 {
 	GENERATED_BODY()
 
@@ -41,9 +41,7 @@ protected:
 		class AActor* OtherActor, class UPrimitiveComponent* OtherComp,
 		int32 OtherBodyIndex) override;
 
-public:	
-	// Called every frame
-	// virtual void Tick(float DeltaTime) override;
+public:
 
 	// Receive Damage
 	//virtual float TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;

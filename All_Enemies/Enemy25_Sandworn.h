@@ -8,7 +8,7 @@
 #include "Enemy25_Sandworn.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AEnemy25_Sandworn : public AEnemyClass
+class LIMITLESS_API AEnemy25_Sandworn : public AEnemyClass
 {
 	GENERATED_BODY()
 
@@ -17,8 +17,6 @@ public:
 	AEnemy25_Sandworn();
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
 
 	// Basic Stats
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
@@ -29,12 +27,4 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "Explotion")
 		void SpawnSandBullet();
 
-public:
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-	
-	// Always moving, the basic attack logic should be in c++ code
-	virtual void CustomTickFunction() override;
-
-	virtual void BasicAttack() override;
 };

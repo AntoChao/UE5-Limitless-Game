@@ -26,25 +26,12 @@ AEnemy19_Hunter_Sniper::AEnemy19_Hunter_Sniper()
 void AEnemy19_Hunter_Sniper::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	// Inicialize all values
-	InitCharacHealth(100.0f);
-
-	SetRarity(EEnemyRarity::ENormal);
-
-	GeneralDistance = 3000.0f;
-
-	BasicAttackDistance = 3000.0f;
-	AbilityOneDistance = 3000.f;
-
-	Ability1Duration = 1.0f;
 
 	SpawnSniperInHand();
 }
 
-void AEnemy19_Hunter_Sniper::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
+void AEnemy19_Hunter_Sniper::CustomTickFunction() {
+	Super::CustomTickFunction();
 
 	UpdateSocketsInfo();
 }
@@ -57,12 +44,10 @@ void AEnemy19_Hunter_Sniper::SpawnSniperInHand()
 	// take careful if it is get mesh or BODY skeleton
 	FTransform LeftHandTrans = Body->GetSocketTransform(Enemy_LeftHand_Socket);
 
-	if (Weapon_SniperRifleClass)
-	{
+	if (Weapon_SniperRifleClass) {
 		Weapon_SniperRifle = GetWorld()->SpawnActor<AWeapon_SniperRifle>(Weapon_SniperRifleClass, LeftHandTrans, ActorSpawnParams);
 
-		if (Weapon_SniperRifle != nullptr)
-		{
+		if (Weapon_SniperRifle != nullptr) {
 			Weapon_SniperRifle->AttachToComponent(Body,
 				FAttachmentTransformRules::SnapToTargetIncludingScale, Enemy_LeftHand_Socket);
 		}
@@ -73,7 +58,10 @@ void AEnemy19_Hunter_Sniper::UpdateSocketsInfo()
 {
 	// need to use 2k i bone in animation blueprint
 	LeftHandPosition = Body->GetSocketLocation(Enemy_LeftHand_Socket);
-	WeaponFirePosition = Weapon_SniperRifle->GetMesh()->GetSocketLocation(Weapon_FirePoint_Socket);
+
+	if (Weapon_SniperRifle) {
+		WeaponFirePosition = Weapon_SniperRifle->GetMesh()->GetSocketLocation(Weapon_FirePoint_Socket);
+	}
 }
 
 void AEnemy19_Hunter_Sniper::BasicAttack()

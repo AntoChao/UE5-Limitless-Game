@@ -8,7 +8,7 @@
 #include "Enemy5_Human_Blade.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AEnemy5_Human_Blade : public AEnemyClass
+class LIMITLESS_API AEnemy5_Human_Blade : public AEnemyClass
 {
 	GENERATED_BODY()
 
@@ -56,7 +56,7 @@ protected:
 
 public:	
 	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	virtual void CustomTickFunction() override;
 
 	// Basic attack -> slash
 	virtual void BasicAttack() override;

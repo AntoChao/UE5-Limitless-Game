@@ -7,7 +7,7 @@
 #include "Enemy15_Bat_1.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AEnemy15_Bat_1 : public AEnemyClass
+class LIMITLESS_API AEnemy15_Bat_1 : public AEnemyClass
 {
 	GENERATED_BODY()
 
@@ -16,9 +16,6 @@ public:
 	AEnemy15_Bat_1();
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
 	//Basic Stats
 
 	UPROPERTY(EditAnywhere, Category = "Enemies")
@@ -44,8 +41,6 @@ protected:
 
 
 public:	
-	// Called every frame
-	// virtual void Tick(float DeltaTime) override;
 
 	// Receive Damage
 	virtual void ExtraDiedAction() override;

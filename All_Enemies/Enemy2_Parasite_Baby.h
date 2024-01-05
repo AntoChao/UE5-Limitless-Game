@@ -7,7 +7,7 @@
 #include "Enemy2_Parasite_Baby.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AEnemy2_Parasite_Baby : public AEnemyClass
+class LIMITLESS_API AEnemy2_Parasite_Baby : public AEnemyClass
 {
 	GENERATED_BODY()
 

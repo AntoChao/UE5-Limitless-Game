@@ -23,20 +23,6 @@ AEnemy31_KillerRabbit::AEnemy31_KillerRabbit()
 void AEnemy31_KillerRabbit::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	// Inicialize all values
-	// TESTING
-	InitCharacHealth(50.0f);
-	
-	SetRarity(EEnemyRarity::ENormal);
-
-	GeneralDistance = 1500.0f;
-
-	AbilityOneDistance = 1500.f;
-	
-	// GetCharacterMovement()->MaxWalkSpeed = FlySpeed;
-
-	EnemyBaseDamage = 2.0f;
 
 }
 

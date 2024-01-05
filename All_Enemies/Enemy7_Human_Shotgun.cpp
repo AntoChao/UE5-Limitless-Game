@@ -42,9 +42,9 @@ void AEnemy7_Human_Shotgun::BeginPlay()
 	SpawnShotgunInHand();
 }
 
-void AEnemy7_Human_Shotgun::Tick(float DeltaTime)
+void AEnemy7_Human_Shotgun::CustomTickFunction()
 {
-	Super::Tick(DeltaTime);
+	Super::CustomTickFunction();
 
 	UpdateSocketsInfo();
 }

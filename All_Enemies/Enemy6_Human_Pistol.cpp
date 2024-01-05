@@ -41,9 +41,9 @@ void AEnemy6_Human_Pistol::BeginPlay()
 	SpawnPistolInHand();
 }
 
-void AEnemy6_Human_Pistol::Tick(float DeltaTime)
+void AEnemy6_Human_Pistol::CustomTickFunction()
 {
-	Super::Tick(DeltaTime);
+	Super::CustomTickFunction();
 
 	UpdateSocketsInfo();
 }

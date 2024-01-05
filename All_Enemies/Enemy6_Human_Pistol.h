@@ -9,7 +9,7 @@
 #include "Enemy6_Human_Pistol.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AEnemy6_Human_Pistol : public AEnemyClass
+class LIMITLESS_API AEnemy6_Human_Pistol : public AEnemyClass
 {
 	GENERATED_BODY()
 
@@ -67,7 +67,7 @@ protected:
 
 public:	
 	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	virtual void CustomTickFunction() override;
 
 	virtual void BasicAttack() override;
 	virtual void Ability1() override;

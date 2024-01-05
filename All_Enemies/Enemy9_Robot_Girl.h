@@ -8,7 +8,7 @@
 #include "Enemy9_Robot_Girl.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AEnemy9_Robot_Girl : public AEnemyClass
+class LIMITLESS_API AEnemy9_Robot_Girl : public AEnemyClass
 {
 	GENERATED_BODY()
 
@@ -17,8 +17,6 @@ public:
 	AEnemy9_Robot_Girl();
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
 
 	// Basic Stats
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
@@ -33,7 +31,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BasicAttack")
 		float OrbSpawnDistance = 100.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BasicAttack")
-		float OrbDestinationDistance = 2000.0f;
+		float OrbDestinationDistance = 3000.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BasicAttack")
 		float AroundHeight = 100.0f;
 	/* Basic Attack -> Spawn "bullet" all around the girl robot and send it*/
@@ -43,11 +41,11 @@ protected:
 
 	// Ability 1
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AbilityOne")
-		int AmountOfPortalOrbs = 10;
+		int AmountOfPortalOrbs = 50;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AbilityOne")
 		float PortalHeight = 500.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AbilityOne")
-		float DestinationOffSet = 500.0f;
+		float DestinationOffSet = 1000.0f;
 	UFUNCTION(BlueprintCallable)
 		FVector CalculatePortalOrbDestination();
 	/* Robot girl stand still, Create a portal above her and spawn infinite bullet around the player*/
@@ -55,9 +53,4 @@ protected:
 		void SpawnAbilityOneOrbs();
 
 public:
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
-	
-	
 };

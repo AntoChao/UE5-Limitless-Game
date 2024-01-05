@@ -7,7 +7,7 @@
 #include "Enemy24_MiniBot.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AEnemy24_MiniBot : public AEnemyClass
+class LIMITLESS_API AEnemy24_MiniBot : public AEnemyClass
 {
 	GENERATED_BODY()
 
@@ -16,8 +16,6 @@ public:
 	AEnemy24_MiniBot();
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
 
 	// Basic Stats
 	
@@ -31,18 +29,4 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "BasicAttack")
 		void SpawnBasicBullet();
 
-	// Ability 1 -> ???
-
-public:
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-	
-	// Always moving, the basic attack logic should be in c++ code
-	virtual void CustomTickFunction() override;
-
-	virtual void BasicAttack() override;
-
-	
-
-	virtual void Ability1() override;
 };

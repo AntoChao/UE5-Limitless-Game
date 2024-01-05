@@ -7,7 +7,7 @@
 #include "Enemy29_Scorpio.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AEnemy29_Scorpio : public AEnemyClass
+class LIMITLESS_API AEnemy29_Scorpio : public AEnemyClass
 {
 	GENERATED_BODY()
 
@@ -16,9 +16,6 @@ public:
 	AEnemy29_Scorpio();
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
 	// Basic Stats
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
 		TSubclassOf<class AWeapon_Bullet> Weapon_BulletClass;
@@ -28,11 +25,4 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "Explotion")
 		void SpawnSandBullet();
 
-
-public:
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
-	virtual void BasicAttack() override;
-	virtual void Ability1() override;
 };

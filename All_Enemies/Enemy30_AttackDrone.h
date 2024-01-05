@@ -7,13 +7,15 @@
 #include "Enemy30_AttackDrone.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AEnemy30_AttackDrone : public AEnemyClass
+class LIMITLESS_API AEnemy30_AttackDrone : public AEnemyClass
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this pawn's properties
 	AEnemy30_AttackDrone();
+
+	virtual void ExtraDiedAction() override;
 
 protected:
 	// Called when the game starts or when spawned

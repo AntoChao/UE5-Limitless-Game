@@ -30,8 +30,7 @@
 
 
 // Sets default values
-AEnemyClass::AEnemyClass()
-{
+AEnemyClass::AEnemyClass() {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -44,10 +43,6 @@ AEnemyClass::AEnemyClass()
 	CollisionComp = CreateDefaultSubobject<UBoxComponent>(TEXT("BoxComp"));
 	CollisionComp->SetupAttachment(GetCapsuleComponent());
 	// RootComponent = CollisionComp;
-
-	// overlap event
-	CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &AEnemyClass::OnOverlapBegin);
-	CollisionComp->OnComponentEndOverlap.AddDynamic(this, &AEnemyClass::OnOverlapEnd);
 
 	//Body = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("EnemyBody"));
 	Body = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Body"));
@@ -66,219 +61,199 @@ AEnemyClass::AEnemyClass()
 
 }
 
-void AEnemyClass::BeginPlay()
-{
+void AEnemyClass::BeginPlay() {
 	Super::BeginPlay();
 	
+	// overlap event
+	CollisionComp->OnComponentBeginOverlap.AddUniqueDynamic(this, &AEnemyClass::OnOverlapBegin);
+	CollisionComp->OnComponentEndOverlap.AddUniqueDynamic(this, &AEnemyClass::OnOverlapEnd);
+
 	MainPlayerTarget = Cast<AMain>(GetWorld()->GetFirstPlayerController()->GetPawn());
 	
-	InitCharacHealth(1.0f);
-
 	SpawnAttachHealthBar();
-	SetRarity(EEnemyRarity::EUnknown);
+	SetRarity(ItsRarity);
 	
 	KillReward = NewObject<UData_KillFeedBackInfo>();
 	// bool exist, float freGain, float calGain, float moveSpeed, int XP
-	KillReward->InitializedAllKillFeedBacks(true, 0.0f, 0.0f, 1.0f, 0);
-
-	if (IsValid(AMiniWorld::StaticClass()) && IsValid(AMiniWorldArtifact) && IsValid(this))
-	{
+	if (IsValid(KillReward)) {
+		KillReward->InitializedAllKillFeedBacks(true, frenzyReward, calmReward, speedReward, xpReward);
+	}
+	
+	if (IsValid(AMiniWorld::StaticClass()) && IsValid(AMiniWorldArtifact) && IsValid(this)) {
 		ArtifactLoot = NewObject<AMiniWorld>(this, AMiniWorld::StaticClass(),
 			NAME_None, RF_NoFlags, AMiniWorldArtifact->GetDefaultObject(), true);
 	}
 
 	EnemyController = Cast<AAIEnemyClassController>(GetController());
-	
-	// Base Damage
-	EnemyBaseDamage = 10.0f;
-	// for random location
-	GeneralDistance = 100.0f;
 
-	IsAttacking = false;
-	BasicAttackDuration = 3.0f;
-
-	// Abilities
-	IsUsingAbility1 = false;
-	IsUsingAbility2 = false;
-	IsUsingAbility3 = false;
-	AbilityOneDistance = 100.0f;
-	AbilityTwoDistance = 100.0f;
-	AbilityThreeDistance = 100.0f;
-	Ability1Duration = 1.0f;
-	Ability2Duration = 1.0f;
-	Ability3Duration = 1.0f;
-
-	PlayRate = 1.0f;
-
-	MinHeight = 0.0f;
-	MaxHeight = 0.0f;
-
-	SetHeightLimit();
 	CalculateMinimalDistance();
-	SetEnemyDefaultSpeed();
 
 	CustomTickFunction();
 }
 
 // Called every frame
 
-void AEnemyClass::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-}
-
 // Health Bar
-void AEnemyClass::SpawnAttachHealthBar()
-{
+void AEnemyClass::SpawnAttachHealthBar() {
 	FActorSpawnParameters ActorSpawnParams;
 	ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-	FTransform HealthBarTrans = HealthBarRoot->GetComponentTransform();
+	if (IsValid(HealthBarRoot)) {
+		FTransform HealthBarTrans = HealthBarRoot->GetComponentTransform();
 
-	HealthBar = GetWorld()->SpawnActor<AHealthBarActor>(HealthBarActorClass,
-		HealthBarTrans, ActorSpawnParams);
+		if (IsValid(HealthBarActorClass)) {
+			HealthBar = GetWorld()->SpawnActor<AHealthBarActor>(HealthBarActorClass,
+				HealthBarTrans, ActorSpawnParams);
+		}
 
-	if (HealthBar != nullptr)
-	{
-		HealthBar->AttachToComponent(HealthBarRoot,
-			FAttachmentTransformRules::SnapToTargetIncludingScale);
+		if (IsValid(HealthBar)) {
+			HealthBar->AttachToComponent(HealthBarRoot,
+				FAttachmentTransformRules::SnapToTargetIncludingScale);
 
-		UpdateHealthBarDisplay();
+			UpdateHealthBarDisplay();
+		}
 	}
 }
 
-void AEnemyClass::UpdateHealthBarDisplay()
-{
-	if (IsValid(HealthBar))
-	{
+void AEnemyClass::UpdateHealthBarDisplay() {
+	if (IsValid(HealthBar)) {
 		HealthBar->SetProgressPercentage(GiveHealthPercentage());
 		SetHealthBarVisible();
 	}
 }
 
 // Health Bar Visibility
-void AEnemyClass::SetHealthBarVisible()
-{
-	if (IsValid(HealthBar))
-	{
+void AEnemyClass::BeDetected() {
+	SetHealthBarVisible();
+}
+
+void AEnemyClass::SetHealthBarVisible() {
+	if (IsValid(HealthBar)) {
 		HealthBar->SetProgressBarVisibility(true);
 		GetWorldTimerManager().SetTimer(HealthBarVisibleTimer, this,
 			&AEnemyClass::SetHealthBarNotVisible, HealthBarVisibleDuration, true);
 	}
 }
 
-void AEnemyClass::SetHealthBarNotVisible()
-{
-	if (IsValid(HealthBar))
-	{
+void AEnemyClass::SetHealthBarNotVisible() {
+	if (IsValid(HealthBar)) {
 		HealthBar->SetProgressBarVisibility(false);
 	}
 }
 
-void AEnemyClass::RemoveHealthBar()
-{
-	if (IsValid(HealthBar))
-	{
+void AEnemyClass::RemoveHealthBar() {
+	if (IsValid(HealthBar)) {
 		HealthBar->Destroy();
 		HealthBar = NULL;
 		HealthBarRoot = NULL;
 	}
 }
 
-void AEnemyClass::CustomTickFunction()
-{
+void AEnemyClass::CustomTickFunction() {
 	Super::CustomTickFunction();
+	
 	UpdatePositions();
+
+	CheckMainTooClose();
 }
 
-void AEnemyClass::setup_stimulus()
-{
+void AEnemyClass::setup_stimulus() {
 	stimulus = CreateDefaultSubobject<UAIPerceptionStimuliSourceComponent>(TEXT("stimulus"));
-	stimulus->RegisterForSense(TSubclassOf<UAISense_Sight>());
-	stimulus->RegisterWithPerceptionSystem();
+	if (IsValid(stimulus)) {
+		stimulus->RegisterForSense(TSubclassOf<UAISense_Sight>());
+		stimulus->RegisterWithPerceptionSystem();
+	}
+	
 }
 
-void AEnemyClass::SetRarity(EEnemyRarity ARarity)
-{
+void AEnemyClass::CheckMainTooClose() {
+	if (IsValid(EnemyController)) {
+		EnemyController->IsTooCloseToMain(
+			AttackDirection.Size() < MinimalDistance);
+	}
+}
+
+void AEnemyClass::SetRarity(EEnemyRarity ARarity) {
 	ItsRarity = ARarity;
 }
-EEnemyRarity AEnemyClass::GetRarity()
-{
+EEnemyRarity AEnemyClass::GetRarity() {
 	return ItsRarity;
 }
 
-void AEnemyClass::SetHeightLimit()
-{
-	LimitHeight = FMath::RandRange(MinHeight, MaxHeight);
+void AEnemyClass::GetDifficultBuff(float modifier) {
+	UpdateMaxHealth(0.0f, modifier);
+	FullHeal(); 
+	SetEnemyDamage(modifier);
+	UpdateDefaultMoveSpeed(modifier);
 }
 
-void AEnemyClass::SetEnemyDefaultSpeed()
-{
-	DefaultMoveSpeed = EnemyMovementSpeed;
-	ChangeCurrentMoveSpeed();
+void AEnemyClass::GetNightBuff(float modifier) {
+	
+	UpdateMaxHealth(0.0f, modifier);
+	FullHeal();
+	SetEnemyDamage(modifier);
+	UpdateDefaultMoveSpeed(modifier);
+}
+
+void AEnemyClass::GetMorningDebuff(float modifier) {
+	
+	UpdateMaxHealth(0.0f, modifier);
+	FullHeal();
+	SetEnemyDamage(modifier);
+	UpdateDefaultMoveSpeed(modifier);
+}
+
+void AEnemyClass::SetEnemyDamage(float modifier) {
+	if (EnemyBaseDamage * modifier < MaxEnemyBaseDamage) {
+		EnemyBaseDamage *= modifier;
+	}
 }
 
 // Behavior tree 
 // General distance is for calculate the random location
-float AEnemyClass::GetGeneralDistance()
-{
+float AEnemyClass::GetGeneralDistance() {
 	return GeneralDistance;
 }
 
-void AEnemyClass::CalculateMinimalDistance()
-{
-	TArray<float> Distances = { BasicAttackDistance, AbilityOneDistance, 
-							   AbilityTwoDistance, AbilityThreeDistance };
-
-	MinimalDistance = Distances[0];
-	for (int i = 1; i < AmountOfPerformance; ++i)
-	{
-		if (Distances[i] < MinimalDistance)
-		{
-			MinimalDistance = Distances[i];
-		}
+void AEnemyClass::CalculateMinimalDistance() {
+	/*
+	if (AmountOfPerformance == 1) {
+		MinimalDistance = BasicAttackDistance;
 	}
+	else if (AmountOfPerformance == 2) {
+
+		if (BasicAttackDistance < AbilityOneDistance) {
+			MinimalDistance = BasicAttackDistance;
+		}
+		else {
+			MinimalDistance = AbilityOneDistance;
+		}
+	}*/
 }
 
 // parent (Standard) -> get pre attack position based on action performing
-FVector AEnemyClass::GetPreAttackPosition()
-{
-	// if the enemy is tooo close -> not even run closer, should run far away
-	/*
-	if (AttackDirection.Size() < MinimalDistance)
-	{
-		return GetPostAttackReposition();
-	}
-	else*/ {}
-
-	if (PerformBasicAttack)
-	{
+FVector AEnemyClass::GetPreAttackPosition() {
+	if (PerformBasicAttack) {
 		return GetRandLocation(SelfPosition, MainPosition, BasicAttackDistance);
 	}
-	else if (PerformAbilityOne)
-	{
+	else if (PerformAbilityOne) {
 		return GetRandLocation(SelfPosition, MainPosition, AbilityOneDistance);
 	}
-	else if (PerformAbilityTwo)
-	{
+	else if (PerformAbilityTwo) {
 		return GetRandLocation(SelfPosition, MainPosition, AbilityTwoDistance);
 	}
-	else if (PerformAbilityThree)
-	{
+	else if (PerformAbilityThree) {
 		return GetRandLocation(SelfPosition, MainPosition, AbilityThreeDistance);
 	}
-	else
-	{
+	else {
 		return MainPosition;
 	}
 
 }
-FVector AEnemyClass::GetAttackFinishedPosition()
-{
+FVector AEnemyClass::GetAttackFinishedPosition() {
 	return SelfPosition; /*Standard*/
 }
-FVector AEnemyClass::GetPostAttackReposition()
-{
+FVector AEnemyClass::GetPostAttackReposition() {
 	return GetRetreatLocation(SelfPosition, MainPosition, GeneralDistance);
 }
 
@@ -287,62 +262,43 @@ FVector AEnemyClass::GetPostAttackReposition()
 	2: Get a valid random navigatable location from this point
 	3: Validate the random point by comparing with the general distance */
 FVector AEnemyClass::GetRandLocation(FVector InitLocation, FVector
-	TargetLocation, float Distance)
-{
+	TargetLocation, float Distance) {
 	NavArea = FNavigationSystem::
 		GetCurrent<UNavigationSystemV1>(MainPlayerTarget);
 
 	int counter;
 
-	if (NavArea)
-	{
+	if (IsValid(NavArea)) {
 		GenerateRandomPoint(InitLocation, TargetLocation);
 		
-		for (counter = 0; counter < MaxRandomTryTimes; counter++)
-		{
-			if (RandomLocationValid(TargetLocation, Distance))
-			{
+		for (counter = 0; counter < MaxRandomTryTimes; counter++) {
+			if (RandomLocationValid(TargetLocation, Distance)) {
 				break;
 			}
 			GenerateRandomPoint(InitLocation, TargetLocation);
 		}
 	}
-	
-	if (counter >= MaxRandomTryTimes)
-	{
-		DrawDebugSphere
-		(
-			GetWorld(), RandomLocation, 10.0f, 10, FColor::Red, false, 10.0f, 2, 10.0f
-		);
-	}
-	else
-	{
-		DrawDebugSphere
-		(
-			GetWorld(), RandomLocation, 10.0f, 10, FColor::Purple, false, 10.0f, 2, 10.0f
-		);
-	}
-	
+
 	return RandomLocation;
 }
 
 // void cuz the navarea directly set the value to RandomLocation
-void AEnemyClass::GenerateRandomPoint(FVector InitLocation, FVector TargetLocation)
-{
+void AEnemyClass::GenerateRandomPoint(FVector InitLocation, FVector TargetLocation) {
 	FVector Direction = TargetLocation - InitLocation;
 	FVector MidPoint = InitLocation + Direction * 0.5f;
 	float MidPointRadiu = (Direction * 0.5f).Size();
 
 	// set randomlocation to random value reachable fvector
-	NavArea->K2_GetRandomReachablePointInRadius(GetWorld(),
-		MidPoint, RandomLocation,
-		MidPointRadiu);
+	if (IsValid(NavArea)) {
+		NavArea->K2_GetRandomReachablePointInRadius(GetWorld(),
+			MidPoint, RandomLocation,
+			MidPointRadiu);
+	}
 }
 
 /*  is valid the location is outside of general distance
 	Cuz otherwise could happen range enemies walking into player face */
-bool AEnemyClass::RandomLocationValid(FVector TargetLocation, float MaxDistance)
-{
+bool AEnemyClass::RandomLocationValid(FVector TargetLocation, float MaxDistance) {
 	FVector ObjectiveDirection = TargetLocation - RandomLocation;
 	float Distance = ObjectiveDirection.Size();
 	float MinDistance = MaxDistance - MaxDistance * 0.3f;
@@ -350,29 +306,24 @@ bool AEnemyClass::RandomLocationValid(FVector TargetLocation, float MaxDistance)
 	return (Distance < MaxDistance) && (Distance > MinDistance);
 }
 
-FVector AEnemyClass::EnemyGetRandMainLocation()
-{
-	if (IsValid(MainPlayerTarget))
-	{
+FVector AEnemyClass::EnemyGetRandMainLocation() {
+	if (IsValid(MainPlayerTarget)) {
 		return GetRandLocation(SelfPosition, MainPosition, GeneralDistance);
 	}
-	else
-	{
+	else {
 		return SelfPosition;
 	}
 }
 
 
 FVector AEnemyClass::GetRetreatLocation(FVector InitPosition, FVector TargetLocation,
-	float RetreatDistance)
-{
+	float RetreatDistance) {
 	FVector ReverseDirection = (InitPosition - TargetLocation).GetSafeNormal();
 
 	return ReverseDirection * RetreatDistance + InitPosition;
 }
 FVector AEnemyClass::GetOppositeLocation(FVector InitPosition, FVector TargetLocation,
-	float OppositeDistance)
-{
+	float OppositeDistance) {
 	FVector ObjectiveDirection = (TargetLocation - InitPosition).GetSafeNormal();
 
 	return ObjectiveDirection * OppositeDistance + TargetLocation;
@@ -380,8 +331,7 @@ FVector AEnemyClass::GetOppositeLocation(FVector InitPosition, FVector TargetLoc
 
 // Selection between basic, attack, ability 1 2 3.
 // Worst implemented function
-void AEnemyClass::TieBreakAction()
-{
+void AEnemyClass::TieBreakAction() {
 	
 	PerformBasicAttack = false;
 	PerformAbilityOne = false;
@@ -398,95 +348,75 @@ void AEnemyClass::TieBreakAction()
 	FString Miau = FString::Printf(TEXT("%d"), ActionChosen);
 	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, Miau);
 	*/
-	if (ActionChosen == 0) /*Basic Attack + Ability 1*/
-	{
+	if (ActionChosen == 0) /*Basic Attack + Ability 1*/ {
 		PerformBasicAttack = true;
 	}
-	else if (ActionChosen == 1)
-	{
+	else if (ActionChosen == 1) {
 		PerformAbilityOne = true;
 	}
-	else if (ActionChosen == 2)
-	{
+	else if (ActionChosen == 2) {
 		PerformAbilityTwo = true;
 	}
-	else if (ActionChosen == 3)
-	{
+	else if (ActionChosen == 3) {
 		PerformAbilityThree = true;
 	}
 }
 
-bool AEnemyClass::IsPerformingAction()
-{
+bool AEnemyClass::IsPerformingAction() {
 	return PerformBasicAttack || PerformAbilityOne || PerformAbilityTwo || PerformAbilityThree;
 }
-bool AEnemyClass::GetPerformBasicAttack()
-{
+bool AEnemyClass::GetPerformBasicAttack() {
 	return PerformBasicAttack;
 }
-bool AEnemyClass::GetPerformAbilityOne()
-{
+bool AEnemyClass::GetPerformAbilityOne() {
 	return PerformAbilityOne;
 }
-bool AEnemyClass::GetPerformAbilityTwo()
-{
+bool AEnemyClass::GetPerformAbilityTwo() {
 	return PerformAbilityTwo;
 }
-bool AEnemyClass::GetPerformAbilityThree()
-{
+bool AEnemyClass::GetPerformAbilityThree() {
 	return PerformAbilityThree;
 }
 
-bool AEnemyClass::IsAbleToUseBasicAttack()
-{
+bool AEnemyClass::IsAbleToUseBasicAttack() {
 	return AttackDirection.Size() <= BasicAttackDistance;
 }
-bool AEnemyClass::IsAbleToUseAbility1()
-{
+bool AEnemyClass::IsAbleToUseAbility1() {
 	return AttackDirection.Size() <= AbilityOneDistance;
 }
-bool AEnemyClass::IsAbleToUseAbility2()
-{
+bool AEnemyClass::IsAbleToUseAbility2() {
 	return AttackDirection.Size() <= AbilityTwoDistance;
 }
-bool AEnemyClass::IsAbleToUseAbility3()
-{
+bool AEnemyClass::IsAbleToUseAbility3() {
 	return AttackDirection.Size() <= AbilityThreeDistance;
 }
 
 // Abilities
-bool AEnemyClass::GetIsAttacking()
-{
+bool AEnemyClass::GetIsAttacking() {
 	return IsAttacking;
 }
-bool AEnemyClass::GetIsUsingAbility1()
-{
+bool AEnemyClass::GetIsUsingAbility1() {
 	return IsUsingAbility1;
 }
 
-bool AEnemyClass::GetIsUsingAbility2()
-{
+bool AEnemyClass::GetIsUsingAbility2() {
 	return IsUsingAbility2;
 }
 
-bool AEnemyClass::GetIsUsingAbility3()
-{
+bool AEnemyClass::GetIsUsingAbility3() {
 	return IsUsingAbility3;
 }
 
-void AEnemyClass::PrepareBasicAttack()
-{
+void AEnemyClass::PrepareBasicAttack() {
 	return;
 }
 
 // Basic Attack, there is no cooldown for basic attack
-void AEnemyClass::BasicAttack()
-{
+void AEnemyClass::BasicAttack() {
 	IsAttacking = true;
 	PlayAnimBasicAttack();
 }
-void AEnemyClass::BasicAttackFinished()
-{
+void AEnemyClass::BasicAttackFinished() {
 	IsAttacking = false;
 	PerformBasicAttack = false;
 }
@@ -494,19 +424,16 @@ void AEnemyClass::BasicAttackFinished()
 
 // Abilities do no automatically link to animation. should define on dif classes
 // Ability 1
-void AEnemyClass::PrepareAbility1()
-{
+void AEnemyClass::PrepareAbility1() {
 	return;
 }
 
-void AEnemyClass::Ability1()
-{
+void AEnemyClass::Ability1() {
 	IsUsingAbility1 = true;
 	PlayAnimAbilityOne(); /*Play Animation by default*/
 }
 
-void AEnemyClass::Ability1Finished()
-{
+void AEnemyClass::Ability1Finished() {
 	IsUsingAbility1 = false;
 	PerformAbilityOne = false;
 }
@@ -514,46 +441,38 @@ void AEnemyClass::Ability1Finished()
 
 
 // Ability 2
-void AEnemyClass::PrepareAbility2()
-{
+void AEnemyClass::PrepareAbility2() {
 	return;
 }
 
-void AEnemyClass::Ability2()
-{
+void AEnemyClass::Ability2() {
 	IsUsingAbility2 = true;
 	PlayAnimAbilityTwo(); /*Play Animation by default*/
 }
 
-void AEnemyClass::Ability2Finished()
-{
+void AEnemyClass::Ability2Finished() {
 	IsUsingAbility2 = false;
 	PerformAbilityTwo = false;
 }
 
 
 // Ability 3
-void AEnemyClass::PrepareAbility3()
-{
+void AEnemyClass::PrepareAbility3() {
 	return;
 }
-void AEnemyClass::Ability3()
-{
+void AEnemyClass::Ability3() {
 	IsUsingAbility3 = true;
 	PlayAnimAbilityThree(); /*Play Animation by default*/
 }
 
-void AEnemyClass::Ability3Finished()
-{
+void AEnemyClass::Ability3Finished() {
 	IsUsingAbility3 = false;
 	PerformAbilityThree = false;
 }
 
 
-void AEnemyClass::UpdatePositions()
-{
-	if (IsValid(MainPlayerTarget))
-	{
+void AEnemyClass::UpdatePositions() {
+	if (IsValid(MainPlayerTarget)) {
 		MainPosition = MainPlayerTarget->GetActorLocation();
 		SelfPosition = GetActorLocation();
 		AttackDirection = MainPosition - SelfPosition;
@@ -561,22 +480,20 @@ void AEnemyClass::UpdatePositions()
 }
 
 // General Damage to overlap actors for basic attack
-void AEnemyClass::DealDamage2Overlapped()
-{
-	CollisionComp->GetOverlappingActors(OverlappedActors, AActor::StaticClass());
-	for (AActor* Actor : OverlappedActors)
-	{
-		if (IsValid(Actor))
-		{
-			UGameplayStatics::ApplyPointDamage(Actor, EnemyBaseDamage,
-				GetActorLocation(), EnemyHit, EnemyController,
-				this, nullptr);
+void AEnemyClass::DealDamage2Overlapped() {
+	if (IsValid(CollisionComp)) {
+		CollisionComp->GetOverlappingActors(OverlappedActors, AActor::StaticClass());
+		for (AActor* Actor : OverlappedActors) {
+			if (IsValid(Actor)) {
+				UGameplayStatics::ApplyPointDamage(Actor, EnemyBaseDamage,
+					GetActorLocation(), EnemyHit, EnemyController,
+					this, nullptr);
+			}
 		}
 	}
 }
 
-FVector AEnemyClass::GetRandomNearbyLocationOfPlayer(float Distance)
-{
+FVector AEnemyClass::GetRandomNearbyLocationOfPlayer(float Distance) {
 	// Generate random angles for azimuth (in radians)
 	float RandomAngle = FMath::RandRange(0.0f, 2 * PI);
 
@@ -587,54 +504,44 @@ FVector AEnemyClass::GetRandomNearbyLocationOfPlayer(float Distance)
 		0.0f
 	) * (FMath::RandRange(0.0f, Distance));
 
-
 	return  MainPosition + RandomOffset;
 }
 
-void AEnemyClass::PlayAnimBasicAttack()
-{
+void AEnemyClass::PlayAnimBasicAttack() {
 	UAnimInstance* AnimInstance = Body->GetAnimInstance();
 
-	if (AnimInstance)
-	{
-		if (IsValid(AnimMontage_BasicAttack))
-		{
+	if (IsValid(AnimInstance)) {
+		if (IsValid(AnimMontage_BasicAttack)) {
 			AnimInstance->Montage_Play(AnimMontage_BasicAttack, PlayRate);
 
 			// Bind the OnMontageEnded event to a custom function
-			AnimInstance->OnMontageEnded.AddDynamic(this, &AEnemyClass::OnMontageBasicAttackEnded);
+			AnimInstance->OnMontageEnded.AddUniqueDynamic(this, &AEnemyClass::OnMontageBasicAttackEnded);
 		}
 	}
 }
 
-void AEnemyClass::PlayAnimAbilityOne()
-{
+void AEnemyClass::PlayAnimAbilityOne() {
 	UAnimInstance* AnimInstance = Body->GetAnimInstance();
 
-	if (AnimInstance)
-	{
-		if (IsValid(AnimMontage_Ability1))
-		{
+	if (IsValid(AnimInstance)) {
+		if (IsValid(AnimMontage_Ability1)) {
 			AnimInstance->Montage_Play(AnimMontage_Ability1, PlayRate);
 
 			// Bind the OnMontageEnded event to a custom function
-			AnimInstance->OnMontageEnded.AddDynamic(this, &AEnemyClass::OnMontageOneEnded);
+			AnimInstance->OnMontageEnded.AddUniqueDynamic(this, &AEnemyClass::OnMontageOneEnded);
 		}
 	}
 }
 
-void AEnemyClass::PlayAnimAbilityTwo()
-{
+void AEnemyClass::PlayAnimAbilityTwo() {
 	UAnimInstance* AnimInstance = Body->GetAnimInstance();
 
-	if (AnimInstance)
-	{
-		if (IsValid(AnimMontage_Ability2))
-		{
+	if (IsValid(AnimInstance)) {
+		if (IsValid(AnimMontage_Ability2)) {
 			AnimInstance->Montage_Play(AnimMontage_Ability2, PlayRate);
 
 			// Bind the OnMontageEnded event to a custom function
-			AnimInstance->OnMontageEnded.AddDynamic(this, &AEnemyClass::OnMontageTwoEnded);
+			AnimInstance->OnMontageEnded.AddUniqueDynamic(this, &AEnemyClass::OnMontageTwoEnded);
 		}
 	}
 }
@@ -643,53 +550,46 @@ void AEnemyClass::PlayAnimAbilityThree()
 {
 	UAnimInstance* AnimInstance = Body->GetAnimInstance();
 
-	if (AnimInstance)
-	{
-		if (IsValid(AnimMontage_Ability3))
-		{
+	if (IsValid(AnimInstance)) {
+		if (IsValid(AnimMontage_Ability3)) {
 			AnimInstance->Montage_Play(AnimMontage_Ability3, PlayRate);
 
 			// Bind the OnMontageEnded event to a custom function
-			AnimInstance->OnMontageEnded.AddDynamic(this, &AEnemyClass::OnMontageThreeEnded);
+			AnimInstance->OnMontageEnded.AddUniqueDynamic(this, &AEnemyClass::OnMontageThreeEnded);
 		}
 	}
 }
 
-void AEnemyClass::OnMontageBasicAttackEnded(UAnimMontage* Montage, bool bInterrupted)
-{
+void AEnemyClass::OnMontageBasicAttackEnded(UAnimMontage* Montage, bool bInterrupted) {
 	BasicAttackFinished();
 }
-void AEnemyClass::OnMontageOneEnded(UAnimMontage* Montage, bool bInterrupted)
-{
+void AEnemyClass::OnMontageOneEnded(UAnimMontage* Montage, bool bInterrupted) {
 	Ability1Finished();
 }
-void AEnemyClass::OnMontageTwoEnded(UAnimMontage* Montage, bool bInterrupted)
-{
+void AEnemyClass::OnMontageTwoEnded(UAnimMontage* Montage, bool bInterrupted) {
 	Ability2Finished();
 }
-void AEnemyClass::OnMontageThreeEnded(UAnimMontage* Montage, bool bInterrupted)
-{
+void AEnemyClass::OnMontageThreeEnded(UAnimMontage* Montage, bool bInterrupted) {
 	Ability3Finished();
 }
 
 // receive damage, but if it get kill, just leave the rewards
-float AEnemyClass::TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
-{
+float AEnemyClass::TakeDamage(float Damage, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) {
 	float DamageCaused = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
 	DamageCaused = -DamageCaused;
 
 	// may check validation of eventInstigator
-	if (IsValid(EventInstigator))
-	{
-		if (EventInstigator->IsA(AMainController::StaticClass()))
-		{
+	if (IsValid(EventInstigator)) {
+		if (EventInstigator->IsA(AMainController::StaticClass())) {
 			
-			UpdateHealthPoint(DamageCaused);
-
 			TakeDamageReaction(Damage, DamageCauser);
 
-			if (Health->GetDied())
-			{
+			UpdateHealthPoint(DamageCaused);
+
+			// Update Health Bar Display as the health is already decrease
+			UpdateHealthBarDisplay();
+
+			if (Health->GetDied()) {
 				// TrueDied(); enemy should insta died
 				ExtraDiedAction();
 
@@ -706,8 +606,7 @@ float AEnemyClass::TakeDamage(float Damage, struct FDamageEvent const& DamageEve
 }
 
 // some enemies may do extra things when they died.
-void AEnemyClass::ExtraDiedAction()
-{
+void AEnemyClass::ExtraDiedAction() {
 	// eliminate the health bar
 	RemoveHealthBar();
 
@@ -716,68 +615,80 @@ void AEnemyClass::ExtraDiedAction()
 
 	// spawn artifact
 	ArtifactLoot->SpawnArtifact(ItsRarity, GetWorld(), GetActorLocation(), GetActorRotation());
-
-
 }
 
 
-void AEnemyClass::TakeDamageReaction(float Damage, AActor* DamageCauser)
-{
-	// Update Health Bar Display as the health is already decrease
-	UpdateHealthBarDisplay();
-
+void AEnemyClass::TakeDamageReaction(float Damage, AActor* DamageCauser) {
 	// Print the damage number
 	SpawnFloatingHealthWidget(Damage);
 
 	//save the damage amount 
 	SaveTotalDamageAmount(Damage);
 
-	// spawn niagara effect
-	SpawnHitEffectNiagara(SelectHitEffectTrans(DamageCauser->GetActorLocation()));
+	if (IsValid(DamageCauser)) {
+		// spawn niagara effect
+		SpawnHitEffectNiagara(SelectHitEffectTrans(DamageCauser->GetActorLocation()));
 
-	// spawn decal effect
-	SpawnHitEffectDecal(GetHitEffectDecalTrans(DamageCauser->GetActorLocation()));
+		// spawn decal effect
+		SpawnHitEffectDecal(GetHitEffectDecalTrans(DamageCauser->GetActorLocation()));
+	}
 }
 
-void AEnemyClass::SpawnFloatingHealthWidget(float Damage)
-{
-	FActorSpawnParameters ActorSpawnParams;
-	ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+void AEnemyClass::SpawnFloatingHealthWidget(float Damage) {
 	
-	FTransform FloatNumberTrans = HealthBarRoot->GetComponentTransform();
+	if (IsValid(HealthBarRoot)) {
+		FActorSpawnParameters ActorSpawnParams;
+		ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-	AFloatingNumberActor* FloatNumberActorDelta = GetWorld()->SpawnActor<AFloatingNumberActor>(FloatingNumberActorClass,
-		FloatNumberTrans, ActorSpawnParams);
+		FTransform FloatNumberTrans = HealthBarRoot->GetComponentTransform();
+		FloatNumberTrans = AddFloatingHealthOffset(FloatNumberTrans);
+		FloatNumberTrans = AddFloatingHealthScale(Damage, FloatNumberTrans);
 
-	FloatNumberActorDelta->SetDamageNumber(Damage);
-	FloatNumberActorDelta->SetDamageColor(EDamageColor::ERed);
 
-	// the widget should be responsible to destroy itself
+		AFloatingNumberActor* FloatNumberActorDelta = GetWorld()->SpawnActor<AFloatingNumberActor>(FloatingNumberActorClass,
+			FloatNumberTrans, ActorSpawnParams);
+
+		if (IsValid(FloatNumberActorDelta)) {
+			FloatNumberActorDelta->SetDamageNumber(Damage);
+			FloatNumberActorDelta->SetDamagePercentage(Damage / Health->GetHealth());
+		}
+	}
 }
 
-EDamageColor AEnemyClass::GetFloatHealthColor(float Damage)
-{
-	return EDamageColor::ERed;
+FTransform AEnemyClass::AddFloatingHealthOffset(FTransform FloatNumTrnas) {
+	float RandomOffsetX = FMath::RandRange(-50.0f, 50.0f);
+	float RandomOffsetY = FMath::RandRange(-50.0f, 50.0f);
+	float RandomOffsetZ = FMath::RandRange(-50.0f, 50.0f);
+
+	FVector CurrentTranslation = FloatNumTrnas.GetTranslation();
+
+	FloatNumTrnas.SetTranslation(CurrentTranslation + FVector(RandomOffsetX, RandomOffsetY, RandomOffsetZ));
+
+	return FloatNumTrnas;
 }
 
-void AEnemyClass::SaveTotalDamageAmount(float Damage)
-{
+FTransform AEnemyClass::AddFloatingHealthScale(float Damage, FTransform FloatNumTrnas) {
+	float scale = Damage / Health->GetHealth();
+	FVector CurrentScale = FloatNumTrnas.GetScale3D();
+
+	FloatNumTrnas.SetScale3D(CurrentScale + FVector(scale, scale, scale));
+
+	return FloatNumTrnas;
+}
+
+void AEnemyClass::SaveTotalDamageAmount(float Damage) {
 	MainPlayerTarget->UpdateTotalDamage(Damage);
 }
 
-FTransform AEnemyClass::SelectHitEffectTrans(FVector DamageDauserPosition)
-{
+FTransform AEnemyClass::SelectHitEffectTrans(FVector DamageDauserPosition) {
 	int index = 0;
 	int correctIndex = 0;
 	int minimumValue = 0;
 	FVector SocketLocation;
 
-	for (FName SocketName: HitEffectSocketsNames)
-	{
-		if (index == 0)
-		{
-			if (Body->DoesSocketExist(HitEffectSocketsNames[index]))
-			{
+	for (FName SocketName: HitEffectSocketsNames) {
+		if (index == 0) {
+			if (Body->DoesSocketExist(HitEffectSocketsNames[index])) {
 				SocketLocation = Body->GetSocketLocation(HitEffectSocketsNames[index]);
 				minimumValue = (DamageDauserPosition - SocketLocation).Size();
 				correctIndex = 0;
@@ -785,14 +696,11 @@ FTransform AEnemyClass::SelectHitEffectTrans(FVector DamageDauserPosition)
 				index++;
 			}	 
 		}
-		else
-		{
-			if (Body->DoesSocketExist(HitEffectSocketsNames[index]))
-			{
+		else {
+			if (Body->DoesSocketExist(HitEffectSocketsNames[index])) {
 				SocketLocation = Body->GetSocketLocation(HitEffectSocketsNames[index]);
 
-				if (minimumValue > (DamageDauserPosition - SocketLocation).Size())
-				{
+				if (minimumValue > (DamageDauserPosition - SocketLocation).Size()) {
 					minimumValue = (DamageDauserPosition - SocketLocation).Size();
 					correctIndex = index;
 				}
@@ -803,12 +711,9 @@ FTransform AEnemyClass::SelectHitEffectTrans(FVector DamageDauserPosition)
 	return Body->GetSocketTransform(HitEffectSocketsNames[correctIndex]);
 }
 
-void AEnemyClass::SpawnHitEffectNiagara(FTransform SpawnTrans)
-{
-	if (HitEffectNiagara)
-	{
-		UNiagaraFunctionLibrary::SpawnSystemAtLocation
-		(
+void AEnemyClass::SpawnHitEffectNiagara(FTransform SpawnTrans) {
+	if (IsValid(HitEffectNiagara)) {
+		UNiagaraFunctionLibrary::SpawnSystemAtLocation (
 			GetWorld(),
 			HitEffectNiagara,
 			SpawnTrans.GetTranslation(),
@@ -822,14 +727,12 @@ void AEnemyClass::SpawnHitEffectNiagara(FTransform SpawnTrans)
 	}
 }
 
-FTransform AEnemyClass::GetHitEffectDecalTrans(FVector DamageDauserPosition)
-{
+FTransform AEnemyClass::GetHitEffectDecalTrans(FVector DamageDauserPosition) {
 	// Calculate the direction from self to the target location
 	FVector SelfLocation = GetActorLocation();
 	FVector Direction = (DamageDauserPosition - SelfLocation).GetSafeNormal();
 
-	for (int i = 0; i < TraceAmount; ++i)
-	{
+	for (int i = 0; i < TraceAmount; ++i) {
 		// Calculate the rotation for this trace
 		FRotator TraceRotation(0.0f, i * TraceAngle, 0.0f);
 
@@ -852,13 +755,10 @@ FTransform AEnemyClass::GetHitEffectDecalTrans(FVector DamageDauserPosition)
 		// DrawDebugLine(GetWorld(), StartTrace, EndTrace, FColor::Red, false, 3, 0, 3);
 
 		// Check if we hit an actor
-		if (bHit && DecalHitResult.GetActor())
-		{
-			// There is an actor in between, you can perform actions here
+		if (bHit && DecalHitResult.GetActor()) {
 			AActor* HitActor = DecalHitResult.GetActor();
 		}
-		else
-		{
+		else {
 			// No actor in between, you can perform actions here
 		}
 	}
@@ -869,79 +769,60 @@ FTransform AEnemyClass::GetHitEffectDecalTrans(FVector DamageDauserPosition)
 	deltaTrans.SetScale3D(FVector::OneVector);
 	return deltaTrans;
 }
-void AEnemyClass::SpawnHitEffectDecal(FTransform SpawnTrans)
-{
+
+void AEnemyClass::SpawnHitEffectDecal(FTransform SpawnTrans) {
 	FActorSpawnParameters ActorSpawnParams;
 	ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-	if (HitEffectDecalClass)
-	{
+	if (HitEffectDecalClass) {
 		GetWorld()->SpawnActor<AGeneralDecalActor>(HitEffectDecalClass,
 			SpawnTrans, ActorSpawnParams);
 	}
 }
 
-void AEnemyClass::ApplyDamageToMain(float damage)
-{
-	if (IsValid(MainPlayerTarget))
-	{
+void AEnemyClass::ApplyDamageToMain(float damage) {
+	if (IsValid(MainPlayerTarget)) {
 		UGameplayStatics::ApplyPointDamage(MainPlayerTarget, damage, GetActorLocation(), EnemyHit, nullptr, this, nullptr);
 	}
 }
 
-void AEnemyClass::RewardMainCharacter()
-{
-	// AMain* Player = Cast<AMain>(MainPlayerTarget);
-	KillReward = MainPlayerTarget->ApplyAllKillerFeedBackArtifacts(KillReward, this);
-	MainPlayerTarget->ProcessKillFeedBacks(KillReward);
-}
-
-/* Kind of useless, because at the end of the day, it can not realize the navigation system
-* it go through buildings
-* It work more likely as a tp
-*/
-void AEnemyClass::CustomMoveTo()
-{
-	if (MoveCurveFloat)
-	{
-		FOnTimelineFloat MoveProgressFunction;
-
-		MoveProgressFunction.BindUFunction(this, FName("CustomMoving"));
-
-		CustomMoveTimeline.AddInterpFloat(MoveCurveFloat, MoveProgressFunction);
-		CustomMoveTimeline.SetLooping(false);
-
-		CustomMoveTimeline.PlayFromStart();
-
+void AEnemyClass::RewardMainCharacter() {
+	if (IsValid(KillReward)) {
+		KillReward = MainPlayerTarget->ApplyAllKillerFeedBackArtifacts(KillReward, this);
+		MainPlayerTarget->ProcessKillFeedBacks(KillReward);
 	}
-}
-
-void AEnemyClass::CustomMoving(float Value)
-{
-	// check float value	
-	// FString miau = FString::SanitizeFloat(Value);
-	// GEngine->AddOnScreenDebugMessage(-1, 2.0, FColor::Red, *miau);
-
-	// FVector NewLocation = FMath::Lerp(GetActorLocation(), RandomLocation, Value)
-	// sSetActorLocation(NewLocation);
-}
-
-// ok
-void AEnemyClass::testing()
-{
-	GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, TEXT("Is testing"));
 }
 
 void AEnemyClass::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp,
 	class AActor* OtherActor, class UPrimitiveComponent* OtherComp,
-	int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
+	int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
 	return;
 }
 
 void AEnemyClass::OnOverlapEnd(class UPrimitiveComponent* OverlappedComp,
 	class AActor* OtherActor, class UPrimitiveComponent* OtherComp,
-	int32 OtherBodyIndex)
-{
+	int32 OtherBodyIndex) {
 	return;
+}
+
+// ALL SOUNDS 
+// basic attack sound 
+void AEnemyClass::PlayBasicAttackSound() {
+	if (IsValid(BasicAttackSoundCue)) {
+		UGameplayStatics::PlaySoundAtLocation(this, BasicAttackSoundCue, GetActorLocation());
+	}
+}
+
+// ability sound
+void AEnemyClass::PlayAbilityOneSound() {
+	if (IsValid(AbilityOneSoundCue)) {
+		UGameplayStatics::PlaySoundAtLocation(this, AbilityOneSoundCue, GetActorLocation());
+	}
+}
+
+// take hit reaction sound
+void AEnemyClass::PlayHitReactSound() {
+	if (IsValid(HitReactSoundCue)) {
+		UGameplayStatics::PlaySoundAtLocation(this, HitReactSoundCue, GetActorLocation());
+	}
 }

@@ -43,9 +43,9 @@ void AEnemy5_Human_Blade::BeginPlay()
 	SpawnBladeInHand();
 }
 
-void AEnemy5_Human_Blade::Tick(float DeltaTime)
+void AEnemy5_Human_Blade::CustomTickFunction()
 {
-	Super::Tick(DeltaTime);
+	Super::CustomTickFunction();
 
 	UpdateSocketsInfo();
 }

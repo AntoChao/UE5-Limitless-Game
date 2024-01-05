@@ -7,7 +7,7 @@
 #include "Enemy31_KillerRabbit.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AEnemy31_KillerRabbit : public AEnemyClass
+class LIMITLESS_API AEnemy31_KillerRabbit : public AEnemyClass
 {
 	GENERATED_BODY()
 

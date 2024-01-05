@@ -9,7 +9,7 @@
 #include "Enemy22_Cultist.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AEnemy22_Cultist : public AEnemyClass
+class LIMITLESS_API AEnemy22_Cultist : public AEnemyClass
 {
 	GENERATED_BODY()
 
@@ -18,8 +18,6 @@ public:
 	AEnemy22_Cultist();
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
 
 	// Basic Stats --> NO IDEA
 	// Basic Attack -> spawn more cultist
@@ -41,13 +39,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ability 1")
 		float SelfDestoyDamage = 99999.0f;
 
-	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "AbilityOne")
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "Ability 1")
 		void SpawnSuicideExplotionNiagara();
 
-public:
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	UFUNCTION(BlueprintCallable, Category = "Ability 1")
+		void DealSelfDamage();
 
-	virtual void BasicAttack() override;
-	virtual void Ability1() override;
 };

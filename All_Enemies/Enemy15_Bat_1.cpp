@@ -14,53 +14,34 @@
 #include "../Main.h"
 
 // Sets default values
-AEnemy15_Bat_1::AEnemy15_Bat_1()
-{
+AEnemy15_Bat_1::AEnemy15_Bat_1(){
 }
 
-// Called when the game starts or when spawned
-void AEnemy15_Bat_1::BeginPlay()
-{
-	Super::BeginPlay();
-	
-	// Inicialize all values
-	InitCharacHealth(1.0f);
-	
-	GeneralDistance = 2000.0f;
-
-	BasicAttackDistance = 750.0f;
-
-	SetRarity(EEnemyRarity::ENormal);
-}
-
-void AEnemy15_Bat_1::BasicAttack()
-{
+void AEnemy15_Bat_1::BasicAttack() {
 	Super::BasicAttack();
 	UpdateExtraSpeed(1000.0f);
 }
 
-void AEnemy15_Bat_1::BasicAttackFinished(){
+void AEnemy15_Bat_1::BasicAttackFinished() {
 	Super::BasicAttackFinished();
 	ResetExtraSpeed();
 
-	SelfExplode();
+	ExtraDiedAction();
 }
 
-void AEnemy15_Bat_1::ExtraDiedAction()
-{
+void AEnemy15_Bat_1::ExtraDiedAction() {
 	Super::ExtraDiedAction();
 
 	SelfExplode();
+	Destroy();
 }
 
-void AEnemy15_Bat_1::SelfExplode()
-{
+void AEnemy15_Bat_1::SelfExplode() {
 	DealExplotionDamage();
 	SpawmExplodeNiagara();
 }
 
-void AEnemy15_Bat_1::DealExplotionDamage()
-{
+void AEnemy15_Bat_1::DealExplotionDamage() {
 	DealDamage2Overlapped();
 }
 

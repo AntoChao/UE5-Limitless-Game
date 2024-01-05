@@ -10,7 +10,7 @@
 * Just a slash which has collision and deal damage to main if collide
 */
 UCLASS()
-class TRUEPROJECT2_API AEnemy2_Parasite_VenomGas : public AActor
+class LIMITLESS_API AEnemy2_Parasite_VenomGas : public AActor
 {
 	GENERATED_BODY()
 	

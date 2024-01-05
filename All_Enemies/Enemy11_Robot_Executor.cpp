@@ -22,11 +22,6 @@ AEnemy11_Robot_Executor::AEnemy11_Robot_Executor()
 void AEnemy11_Robot_Executor::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	// Inicialize all values
-	InitCharacHealth(300.0f);
-	
-	SetRarity(EEnemyRarity::ENormal);
 }
 
 bool AEnemy11_Robot_Executor::IsAbleToUseAbility1()

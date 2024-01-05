@@ -7,7 +7,7 @@
 #include "Enemy15_Bat_2.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AEnemy15_Bat_2 : public AEnemyClass
+class LIMITLESS_API AEnemy15_Bat_2 : public AEnemyClass
 {
 	GENERATED_BODY()
 

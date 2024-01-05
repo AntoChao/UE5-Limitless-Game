@@ -11,6 +11,8 @@
 #include "Components/BoxComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "DrawDebugHelpers.h"
+#include "../meshes/Weapon_SniperRifle.h"
+#include "../meshes/Weapon_Bullet.h"
 #include "../Main.h"
 
 /*
@@ -26,18 +28,6 @@ AEnemy27_Swat::AEnemy27_Swat()
 void AEnemy27_Swat::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	// Inicialize all values
-	InitCharacHealth(100.0f);
-
-	SetRarity(EEnemyRarity::ENormal);
-
-	GeneralDistance = 2000.0f;
-
-	BasicAttackDistance = 500.0f;
-	AbilityOneDistance = 300.f;
-
-	Ability1Duration = 1.0f;
 
 }
 
