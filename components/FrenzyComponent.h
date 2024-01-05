@@ -8,7 +8,7 @@
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class TRUEPROJECT2_API UFrenzyComponent : public UActorComponent
+class LIMITLESS_API UFrenzyComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
@@ -17,9 +17,6 @@ public:
 	UFrenzyComponent();
 
 protected:
-	// Called when the game starts
-	virtual void BeginPlay() override;
-
 	float frenzy = 0.0f;
 	float maxFrenzy = 100.0f;
 

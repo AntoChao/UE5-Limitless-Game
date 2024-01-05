@@ -14,7 +14,7 @@
 * Character should not have this component, as they do not deal damage directly
 */ 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class TRUEPROJECT2_API UDamageComponent : public UActorComponent
+class LIMITLESS_API UDamageComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
@@ -24,24 +24,43 @@ public:
 
 protected:
 	// Basic Stats
-	float baseDamage = 0.0f;
-	float critChance = 0.0f;
-	float critMultiplier = 0.0f;
-	float fireRate = 0.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage Control")
+		float baseDamage = 0.0f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage Control")
+		float critChance = 0.0f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage Control")
+		float critMultiplier = 0.0f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage Control")
+		float fireRate = 1.0f;
 
 public:	
 	// Getters and Setters
-	void SetDamage(float damageValue);
-	float GetDamage();
-	void SetCritChance(float critChanceValue);
-	float GetCritChance();
-	void SetCritMultiplier(float critMultiplierValue);
-	float GetCritMultiplier();
-	void SetFireRate(float fireRateValue);
-	float GetFireRate();
+	UFUNCTION(BlueprintCallable, Category = "Damage Control")
+		void SetDamage(float damageValue);
+
+	UFUNCTION(BlueprintCallable, Category = "Damage Control")
+		float GetDamage();
+	
+	UFUNCTION(BlueprintCallable, Category = "Damage Control")
+		void SetCritChance(float critChanceValue);
+	
+	UFUNCTION(BlueprintCallable, Category = "Damage Control")
+		float GetCritChance();
+	
+	UFUNCTION(BlueprintCallable, Category = "Damage Control")
+		void SetCritMultiplier(float critMultiplierValue);
+	
+	UFUNCTION(BlueprintCallable, Category = "Damage Control")
+		float GetCritMultiplier();
+	
+	UFUNCTION(BlueprintCallable, Category = "Damage Control")
+		void SetFireRate(float fireRateValue);
+	
+	UFUNCTION(BlueprintCallable, Category = "Damage Control")
+		float GetFireRate();
 
 	// Futher functionalities
-	float CalculateDamage(UCharacterPowerComponent* PowerComponent);
-	bool CritictStrike(float Probability);
-
 };

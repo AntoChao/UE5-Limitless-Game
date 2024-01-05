@@ -4,55 +4,35 @@
 #include "FrenzyComponent.h"
 
 // Sets default values for this component's properties
-UFrenzyComponent::UFrenzyComponent()
-{
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
-
-	// ...
+UFrenzyComponent::UFrenzyComponent(){
 }
-
-
-// Called when the game starts
-void UFrenzyComponent::BeginPlay()
-{
-	Super::BeginPlay();
-
-	// ...
-	
-}
-
-void UFrenzyComponent::SetFrenzy(float frenzyAmount)
-{
+void UFrenzyComponent::SetFrenzy(float frenzyAmount) {
 	frenzy = frenzyAmount;
 }
-float UFrenzyComponent::GetFrenzy()
-{
+float UFrenzyComponent::GetFrenzy() {
 	return frenzy;
 }
-void UFrenzyComponent::SetMaxFrenzy(float maxFrenzyAmount)
-{
+void UFrenzyComponent::SetMaxFrenzy(float maxFrenzyAmount) {
 	maxFrenzy = maxFrenzyAmount;
 }
-float UFrenzyComponent::GetMaxFrenzy()
-{
+float UFrenzyComponent::GetMaxFrenzy() {
 	return maxFrenzy;
 }
 
 // to UI the percentage
-float UFrenzyComponent::GetFrenzyPercentage()
-{
+float UFrenzyComponent::GetFrenzyPercentage() {
 	return frenzy / maxFrenzy;
 }
 
 // update character frenzy value
-void UFrenzyComponent::UpdateFrenzy(float modifier)
-{
+void UFrenzyComponent::UpdateFrenzy(float modifier){
 	frenzy += modifier;
+
+	if (frenzy < 0) {
+		frenzy = 0;
+	}
 }
 
-void UFrenzyComponent::UpdateMaxFrenzy(float modifier)
-{
+void UFrenzyComponent::UpdateMaxFrenzy(float modifier){
 	maxFrenzy += modifier;
 }

@@ -4,73 +4,50 @@
 #include "CalmComponent.h"
 
 // Sets default values for this component's properties
-UCalmComponent::UCalmComponent()
-{
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
-
-	// ...
+UCalmComponent::UCalmComponent() {
 }
 
-
-// Called when the game starts
-void UCalmComponent::BeginPlay()
-{
-	Super::BeginPlay();
-
-	// ...
-	
-}
-
-bool UCalmComponent::isInMaxCalm()
-{
+bool UCalmComponent::isInMaxCalm() {
 	return calm >= maxCalm;
 }
 
-void UCalmComponent::SetCalm(float calmAmount)
-{
+void UCalmComponent::SetCalm(float calmAmount) {
 	calm = calmAmount;
 }
-float UCalmComponent::GetCalm()
-{
+float UCalmComponent::GetCalm(){
 	return calm;
 }
-void UCalmComponent::SetMaxCalm(float maxCalmAmount)
-{
+void UCalmComponent::SetMaxCalm(float maxCalmAmount){
 	maxCalm = maxCalmAmount;
 }
-float UCalmComponent::GetMaxCalm()
-{
+float UCalmComponent::GetMaxCalm(){
 	return maxCalm;
 }
 
 // to UI the percentage
-float UCalmComponent::GetCalmPercentage()
-{
+float UCalmComponent::GetCalmPercentage(){
 	return calm / maxCalm;
 }
 
 // update character frenzy value
-void UCalmComponent::UpdateCalm(float modifier)
-{
-	if (!isInMaxCalm())
-	{
+void UCalmComponent::UpdateCalm(float modifier){
+	if (!isInMaxCalm()) {
 		calm += modifier;
+
+		if (calm < 0) {
+			calm = 0;
+		}
 	}
-	else
-	{
+	else {
 		calm = maxCalm;
 	}
 }
 
-void UCalmComponent::UpdateMaxCalm(float modifier)
-{
+void UCalmComponent::UpdateMaxCalm(float modifier) {
 	maxCalm += modifier;
 }
 
-float UCalmComponent::UseAllCalm()
-{
+float UCalmComponent::UseAllCalm() {
 	float aux = calm;
 	calm = 0.0f;
 	return aux;

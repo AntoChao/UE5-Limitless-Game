@@ -7,7 +7,7 @@
 #include "CalmComponent.generated.h"
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class TRUEPROJECT2_API UCalmComponent : public UActorComponent
+class LIMITLESS_API UCalmComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
@@ -16,9 +16,6 @@ public:
 	UCalmComponent();
 
 protected:
-	// Called when the game starts
-	virtual void BeginPlay() override;
-
 	float calm = 0.0f;
 	float maxCalm = 100.0f;
 

@@ -10,7 +10,7 @@
  * 
  */
 UCLASS()
-class TRUEPROJECT2_API UTheMovementComponent : public UMovementComponent
+class LIMITLESS_API UTheMovementComponent : public UMovementComponent
 {
 	GENERATED_BODY()
 	

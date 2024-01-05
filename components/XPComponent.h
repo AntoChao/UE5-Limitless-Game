@@ -8,7 +8,7 @@
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class TRUEPROJECT2_API UXPComponent : public UActorComponent
+class LIMITLESS_API UXPComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
@@ -17,39 +17,58 @@ public:
 	UXPComponent();
 
 protected:
-	// Called when the game starts
-	virtual void BeginPlay() override;
 
-	float XPRatio = 2.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "XP Component")
+		float XPRatio = 2.0f;
 
-	float xp = 0.0f;
-	int level = 1;
-	float xp_required = 0.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "XP Component")
+		float xp = 0.0f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "XP Component")
+		int level = 1;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "XP Component")
+		float xp_required = 10.0f;
 
 	// current total work same as xp, but it never reset
-	float current_total = 0.0f;
-	float xp_total_gain = 0.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "XP Component")
+		float current_total = 0.0f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "XP Component")
+		float xp_total_gain = 0.0f;
 
-	bool IsAbleToLevelUp();
-	bool IsAbleToLevelDown();
+	UFUNCTION(BlueprintCallable, Category = "XP Component")
+		bool IsAbleToLevelUp();
+	
+	UFUNCTION(BlueprintCallable, Category = "XP Component")
+		bool IsAbleToLevelDown();
 
-	void LevelUp();
-	void LevelDown();
-	void UpdateXPRequirement();
+	UFUNCTION(BlueprintCallable, Category = "XP Component")
+		void LevelUp();
+	UFUNCTION(BlueprintCallable, Category = "XP Component")
+		void LevelDown();
+	UFUNCTION(BlueprintCallable, Category = "XP Component")
+		void UpdateXPRequirement();
 
 public:
 	// Setter and getter
-	void SetXP(float xpAmount);
-	float GetXP();
+	UFUNCTION(BlueprintCallable, Category = "XP Component")
+		void SetXP(float xpAmount);
+	UFUNCTION(BlueprintCallable, Category = "XP Component")
+		float GetXP();
+	UFUNCTION(BlueprintCallable, Category = "XP Component")
+		float GetTotalXPRequired();
 
 	// Level Up Logic
-	void ReceiveXP(int amountXP);
-	bool isAbleToBuy(int amountXP);
+	UFUNCTION(BlueprintCallable, Category = "XP Component")
+		void ReceiveXP(int amountXP);
+	UFUNCTION(BlueprintCallable, Category = "XP Component")
+		bool isAbleToBuy(int amountXP);
 
 	// display
-	float GetXPPercentage();
+	UFUNCTION(BlueprintCallable, Category = "XP Component")
+		float GetXPPercentage();
 
-	FText GetLevelText();
-
-
+	UFUNCTION(BlueprintCallable, Category = "XP Component")
+		FText GetLevelText();
 };

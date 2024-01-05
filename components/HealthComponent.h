@@ -8,7 +8,7 @@
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class TRUEPROJECT2_API UHealthComponent : public UActorComponent
+class LIMITLESS_API UHealthComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
@@ -17,10 +17,8 @@ public:
 	UHealthComponent();
 
 protected:
-	// Called when the game starts
-	virtual void BeginPlay() override;
-
 	// base stats
+	int MaxInt = 2147483647;
 	float health = 0.0f;
 	float maxHealth = 0.0f;
 	bool died = false;
@@ -43,6 +41,7 @@ public:
 	void UpdateHealthByPercentageOfMaxHealth(float modifier);
 
 	void UpdateMaxHealth(float modifier, float maxHealthMultiplier);
+	void RefillMaxHealth();
 
 	void SetDied(bool HPState);
 	bool GetDied();

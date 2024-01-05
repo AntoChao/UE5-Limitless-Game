@@ -13,7 +13,7 @@
 * Character should not have this component, as they do not deal damage directly
 */ 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
-class TRUEPROJECT2_API UCharacterPowerComponent : public UActorComponent
+class LIMITLESS_API UCharacterPowerComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
@@ -23,27 +23,57 @@ public:
 
 protected:
 	// Basic Stats
-	float characBasePower = 0.0f;
-	float characBaseCritChance = 0.0f;
-	float characBaseCritMultipier = 0.0f;
-	float characAttackRate = 1.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Power Control")
+		float characBasePower = 5.0f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Power Control")
+		float characBaseCritChance = 5.0f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Power Control")
+		float characBaseCritMultipier = 1.0f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Power Control")
+		float characAttackRate = 1.0f;
 
 public:	
 	// Setters and Getters
-	void SetPower(float PowerValue);
-	float GetPower();
-	void SetCharacCritChance(float critChanceValue);
-	float GetCharacCritChance();
-	void SetCharacCritMultiplier(float critMultiplierValue);
-	float GetCharacCritMultiplier();
-	void SetCharacAttackRate(float attackRateValue);
-	float GetCharacAttackRate();
+	UFUNCTION(BlueprintCallable, Category = "Power Control")
+		void SetPower(float PowerValue);
+	
+	UFUNCTION(BlueprintCallable, Category = "Power Control")
+		float GetPower();
+	
+	UFUNCTION(BlueprintCallable, Category = "Power Control")
+		void SetCharacCritChance(float critChanceValue);
+	
+	UFUNCTION(BlueprintCallable, Category = "Power Control")
+		float GetCharacCritChance();
+	
+	UFUNCTION(BlueprintCallable, Category = "Power Control")
+		void SetCharacCritMultiplier(float critMultiplierValue);
+	
+	UFUNCTION(BlueprintCallable, Category = "Power Control")
+		float GetCharacCritMultiplier();
+	
+	UFUNCTION(BlueprintCallable, Category = "Power Control")
+		void SetCharacAttackRate(float attackRateValue);
+
+	UFUNCTION(BlueprintCallable, Category = "Power Control")
+		float GetCharacAttackRate();
 
 	// Updates Values
-	void UpdateFlatPower(float modifier);
-	void UpdatePercentagePower(float modifier);
+	UFUNCTION(BlueprintCallable, Category = "Power Control")
+		void UpdateFlatPower(float modifier);
 	
-	void UpdateCritChance(float modifier);
-	void UpdateCritMultiplier(float modifier);
-	void UpdateAttackRate(float modifier);
+	UFUNCTION(BlueprintCallable, Category = "Power Control")
+		void UpdatePercentagePower(float modifier);
+	
+	UFUNCTION(BlueprintCallable, Category = "Power Control")
+		void UpdateCritChance(float modifier);
+	
+	UFUNCTION(BlueprintCallable, Category = "Power Control")
+		void UpdateCritMultiplier(float modifier);
+	
+	UFUNCTION(BlueprintCallable, Category = "Power Control")
+		void UpdateAttackRate(float modifier);
 };

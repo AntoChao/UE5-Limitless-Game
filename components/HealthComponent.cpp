@@ -4,48 +4,28 @@
 #include "HealthComponent.h"
 
 // Sets default values for this component's properties
-UHealthComponent::UHealthComponent()
-{
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
-	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = true;
-
-	// ...
-}
-
-
-// Called when the game starts
-void UHealthComponent::BeginPlay()
-{
-	Super::BeginPlay();
-
-	// ...
+UHealthComponent::UHealthComponent(){
 	
 }
 
-void UHealthComponent::SetHealth(float HP)
-{
+void UHealthComponent::SetHealth(float HP) {
 	health = HP;
 }
 
-float UHealthComponent::GetHealth()
-{
+float UHealthComponent::GetHealth() {
 	return health;
 }
 
-void UHealthComponent::InitHealth(float maxHP)
-{
+void UHealthComponent::InitHealth(float maxHP) {
 	maxHealth = maxHP;
 	SetHealth(maxHP);
 }
 
-float UHealthComponent::GetMaxHealth()
-{
+float UHealthComponent::GetMaxHealth() {
 	return maxHealth;
 }
 
-float UHealthComponent::GetHealthPercentage()
-{
+float UHealthComponent::GetHealthPercentage() {
 	return health / maxHealth ;
 }
 
@@ -56,103 +36,74 @@ percentage of current health
 percentage of maximum health
 */
 
-void UHealthComponent::UpdateHealthFloat(float modifier)
-{
+void UHealthComponent::UpdateHealthFloat(float modifier) {
 	float deltaHealth = health + modifier;
 
 	// SOMETHING NOT WORKING OK
 
-	FString xd = FString::SanitizeFloat(health);
-	GEngine->AddOnScreenDebugMessage(-1, 5.0, FColor::Yellow, *xd);
-
-	FString la = FString::SanitizeFloat(deltaHealth);
-	GEngine->AddOnScreenDebugMessage(-1, 5.0, FColor::Yellow, *la);
-
 	// if player is died
-	if (deltaHealth <= 0.0f)
-	{
+	if (deltaHealth <= 0.0f) {
 		health = 0.0f;
 		SetDied(true);
 	}
 	// if the healing exceed -> is able to create more stuff
-	else if (deltaHealth > maxHealth)
-	{
+	else if (deltaHealth > maxHealth) {
 		health = maxHealth;
 		ExceedHealth = ExceedHealth + (deltaHealth - maxHealth);
 	}
-	else
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, TEXT("MiauMiau"));
-
+	else {
 		health = health + modifier;
 	}
-
-	FString ja = FString::SanitizeFloat(health);
-	GEngine->AddOnScreenDebugMessage(-1, 5.0, FColor::Yellow, *ja);
-
 }
 
 // min -> -1, max -> +1
-void UHealthComponent::UpdateHealthByPercentageOfCurrentHealth(float modifier)
-{
+void UHealthComponent::UpdateHealthByPercentageOfCurrentHealth(float modifier) {
 	float HealthToModify = health * modifier;
 	// <0 -> means is damage
-	if (modifier < 0.0f)
-	{
+	if (modifier < 0.0f) {
 		UpdateHealthFloat(-HealthToModify);
 	}
 	// >0 ->means is heal
-	else if (modifier > 0.0f)
-	{
+	else if (modifier > 0.0f) {
 		UpdateHealthFloat(HealthToModify);
-	}
-	else
-	{
-		// the modifier should never be 0 -> does not make sense
-		return;
 	}
 }
 
 // min -> -1, max -> +1
-void UHealthComponent::UpdateHealthByPercentageOfMaxHealth(float modifier)
-{
+void UHealthComponent::UpdateHealthByPercentageOfMaxHealth(float modifier) {
 	float HealthToModify = maxHealth * modifier;
 	// <0 -> means is damage
-	if (modifier < 0.0f)
-	{
+	if (modifier < 0.0f) {
 		UpdateHealthFloat(-HealthToModify);
 	}
 	// >0 ->means is heal
-	else if (modifier > 0.0f)
-	{
+	else if (modifier > 0.0f) {
 		UpdateHealthFloat(HealthToModify);
-	}
-	else
-	{
-		// the modifier should never be 0 -> does not make sense
-		return;
 	}
 }
 
 // Difference by health -> there never going to have a max health modifier that depend on current health
-void UHealthComponent::UpdateMaxHealth(float modifier, float maxHealthMultiplier)
-{
-	if (maxHealthMultiplier == 0)
-	{
-		maxHealth += modifier;
+void UHealthComponent::UpdateMaxHealth(float modifier, float maxHealthMultiplier) {
+	if (maxHealthMultiplier == 0) {
+		if (maxHealth + modifier < MaxInt) {
+			maxHealth += modifier;
+		}
 	}
-	else
-	{
-		maxHealth = maxHealth + maxHealth * maxHealthMultiplier;
+	else {
+		if (maxHealth * maxHealthMultiplier < MaxInt) {
+			maxHealth = maxHealth * maxHealthMultiplier;
+		}
 	}
 }
 
-void UHealthComponent::SetDied(bool HPState)
-{
+void UHealthComponent::RefillMaxHealth() {
+	health = maxHealth;
+}
+
+void UHealthComponent::SetDied(bool HPState) {
 	died = HPState;
 }
 
-bool UHealthComponent::GetDied()
-{
+bool UHealthComponent::GetDied() {
 	return died;
 }
