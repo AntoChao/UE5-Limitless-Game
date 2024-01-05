@@ -9,12 +9,16 @@
 #include "PlayerStatsUMG.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API UPlayerStatsUMG : public UUserWidget
+class LIMITLESS_API UPlayerStatsUMG : public UUserWidget
 {
 	GENERATED_BODY()
 
 protected:
 	// Variables to display
+	// Objectives
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Display Stats")
+		FText CurrentObjective;
+
 	// Health frenzy calm 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Display Stats")
 		float HealthPercentageToDisplay = 0.0f;
@@ -31,9 +35,12 @@ protected:
 
 	// Time 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Display Time")
-		FText TimeStringToDisplay;
+		int CurrentSeg;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Display Time")
-		float TimePercentageToDisplay = 0.0f;
+		int CurrentHour;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Display Time")
+		int CurrentDay;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Display Time")
 		bool IsInMorning = false;
 
@@ -51,13 +58,16 @@ public:
 		void SetLevelPercentage(float LevelPercentage);
 
 	UFUNCTION(BlueprintCallable, Category = "Display Time")
-		void SetTimeString(FText ATime);
+		void SetSeconds(float Seconds);
 	UFUNCTION(BlueprintCallable, Category = "Display Time")
-		void SetTime(float TimePercentage);
+		void SetHours(float Hours);
+	UFUNCTION(BlueprintCallable, Category = "Display Time")
+		void SetDay(float Days);
+
 	UFUNCTION(BlueprintCallable, Category = "Display Time")
 		void SetIsInMorning(bool bInMorining);
 
 	UFUNCTION(BlueprintCallable, Category = "Display Time")
-		void HandleObjectives();
+		void UpdateObjective(FText NewObjective);
 
 };

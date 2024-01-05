@@ -3,51 +3,49 @@
 
 #include "PlayerStatsUMG.h"
 #include "Components/ProgressBar.h"
-
+#include "Math/UnrealMathUtility.h"
 
 // Character Level
-void UPlayerStatsUMG::SetHealth(float HealthPercentage)
-{
+void UPlayerStatsUMG::SetHealth(float HealthPercentage) {
 	HealthPercentageToDisplay = HealthPercentage;
 }
 
-void UPlayerStatsUMG::SetFrenzy(float FrenzyPercentage)
-{
+void UPlayerStatsUMG::SetFrenzy(float FrenzyPercentage) {
 	FrenzyPercentageToDisplay = FrenzyPercentage;
 }
 
-void UPlayerStatsUMG::SetCalm(float CalmPercentage)
-{
+void UPlayerStatsUMG::SetCalm(float CalmPercentage) {
 	CalmPercentageToDisplay = CalmPercentage;
 }
 
-void UPlayerStatsUMG::SetLevelNumber(FText LevelTxt)
-{
+void UPlayerStatsUMG::SetLevelNumber(FText LevelTxt) {
 	LVToDisplay = LevelTxt;
 }
 
-void UPlayerStatsUMG::SetLevelPercentage(float LevelPercentage)
-{
+void UPlayerStatsUMG::SetLevelPercentage(float LevelPercentage) {
 	XPPercentageToDisplay = LevelPercentage;
 }
 
 // Time
-void UPlayerStatsUMG::SetTimeString(FText ATime)
-{
-	TimeStringToDisplay = ATime;
+void UPlayerStatsUMG::SetSeconds(float Seconds) {
+	/*
+	GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, TEXT("Seconds:"));
+	GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, FString::SanitizeFloat(Seconds));
+	*/
+	CurrentSeg = FMath::RoundToInt(Seconds);
+}
+void UPlayerStatsUMG::SetHours(float Hours) {
+	CurrentHour = FMath::RoundToInt(Hours);
+}
+void UPlayerStatsUMG::SetDay(float Days) {
+	CurrentDay = FMath::RoundToInt(Days);
 }
 
-void UPlayerStatsUMG::SetTime(float TimePercentage)
-{
-	TimePercentageToDisplay = TimePercentage;
-}
-void UPlayerStatsUMG::SetIsInMorning(bool bInMorining)
-{
+void UPlayerStatsUMG::SetIsInMorning(bool bInMorining) {
 	IsInMorning = bInMorining;
 }
 
 // Objectives
-void UPlayerStatsUMG::HandleObjectives()
-{
-	return;
+void UPlayerStatsUMG::UpdateObjective(FText NewObjective) {
+	CurrentObjective = NewObjective;
 }

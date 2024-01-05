@@ -8,7 +8,7 @@
 #include "FloatingNumberActor.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AFloatingNumberActor : public AActor
+class LIMITLESS_API AFloatingNumberActor : public AActor
 {
 	GENERATED_BODY()
 	
@@ -34,6 +34,6 @@ public:
 		void SetDamageNumber(float damage);
 
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "Set Float Number")
-		void SetDamageColor(EDamageColor damageColor);
+		void SetDamagePercentage(float percentage);
 
 };

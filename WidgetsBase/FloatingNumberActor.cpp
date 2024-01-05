@@ -26,6 +26,5 @@ void AFloatingNumberActor::BeginPlay()
 
 void AFloatingNumberActor::SelfDestroyTimer()
 {
-	GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, TEXT("Float Number Destroyed"));
 	Destroy();
 }

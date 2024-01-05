@@ -9,7 +9,7 @@
 #include "HitFloatingHealthUMG.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API UHitFloatingHealthUMG : public UUserWidget
+class LIMITLESS_API UHitFloatingHealthUMG : public UUserWidget
 {
 	GENERATED_BODY()
 
@@ -18,13 +18,13 @@ protected:
 		FString FloatHealthText;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Display")
-		EDamageColor DamageTextColor;
+		FLinearColor  DamageTextColor = FLinearColor::White;
 
 public:
 	UFUNCTION(BlueprintCallable, Category = "Setter")
 		void SetHealthText(FString TheText);
 	
 	UFUNCTION(BlueprintCallable, Category = "Setter")
-		void SetDamageColor(EDamageColor AColor);
+		void LerpDamageColor(float Percentage);
 
 };

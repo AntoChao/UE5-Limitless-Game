@@ -9,7 +9,7 @@
 #include "HealthBarUMG.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API UHealthBarUMG : public UUserWidget
+class LIMITLESS_API UHealthBarUMG : public UUserWidget
 {
 	GENERATED_BODY()
 

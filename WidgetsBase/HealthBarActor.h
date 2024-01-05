@@ -8,7 +8,7 @@
 #include "HealthBarActor.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AHealthBarActor : public AActor
+class LIMITLESS_API AHealthBarActor : public AActor
 {
 	GENERATED_BODY()
 	
