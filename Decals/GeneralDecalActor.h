@@ -8,7 +8,7 @@
 #include "GeneralDecalActor.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AGeneralDecalActor : public AActor
+class LIMITLESS_API AGeneralDecalActor : public AActor
 {
 	GENERATED_BODY()
 	
