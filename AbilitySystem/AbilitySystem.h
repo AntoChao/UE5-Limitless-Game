@@ -4,6 +4,32 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+
+// know individual abilities
+// abilities to recognize
+#include "../abilities/AbilityTest.h"
+#include "../abilities/Ability_BasicPistol.h"
+#include "../abilities/Ability_Shotgun.h"
+#include "../abilities/Ability_Sniper.h"
+#include "../abilities/Ability_Blade.h"
+#include "../abilities/Ability_BlackHoleBomb.h"
+#include "../abilities/Ability_AlienGun.h"
+// BombBaiter
+// Wall Breaker
+#include "../abilities/Ability_WireTrap.h"
+// ShadowSolder
+// ShadowTravel
+#include "../abilities/Ability_ReversePorjectiles.h"
+#include "../abilities/Ability_Teleport.h"
+// Switch dimention
+#include "../abilities/Ability_BulletTime.h"
+#include "../abilities/Ability_FForward.h"
+#include "../abilities/Ability_Paralyze.h"
+#include "../abilities/Ability_Open_Command.h"
+// sum eagle
+#include "../abilities/Ability_Sum_MomFoot.h"
+#include "../abilities/Ability_Sum_Rabbit.h"
+
 #include "AbilitySystem.generated.h"
 
 /* Abilities code (for now)
@@ -21,7 +47,7 @@ AbilityTest = 0
 */
 
 UCLASS(BlueprintType, Blueprintable, ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
-class TRUEPROJECT2_API AAbilitySystem : public AActor
+class LIMITLESS_API AAbilitySystem : public AActor
 {
 	GENERATED_BODY()
 	
@@ -37,6 +63,9 @@ protected:
 	UPROPERTY()
 		TSubclassOf<class AMain> MainClass;
 
+	UPROPERTY()
+		class UWorld* GameWorld;
+	
 	// All abilities in array 
 	UPROPERTY()
 		TArray<int> AbilityList = {0, 11, 12, 13, 14, 15,
@@ -52,80 +81,118 @@ protected:
 		float DefAttackRate;
 
 	// AbilityFeedBack
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FeedBack", meta = (AllowPrivateAccess = "true"))
-		class UData_AbilityFeedBackInfo* FeedBackContainer;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "FeedBack" )
+		class UData_AbilityFeedBackInfo* FeedBackContainer = nullptr;
 
 	// all abilities objects
 		// Test
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability", meta = (AllowPrivateAccess = "true"))
-		class AAbilityTest* AbilityTest;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability")
+		TSubclassOf<class AAbilityTest> AbilityTestClass = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability" )
+		class AAbilityTest* AbilityTest = nullptr;
 
 		// Weapon Category
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability", meta = (AllowPrivateAccess = "true"))
-		class AAbility_BasicPistol* AbilityPistol;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability", meta = (AllowPrivateAccess = "true"))
-		class AAbility_Shotgun* AbilityShotgun;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability", meta = (AllowPrivateAccess = "true"))
-		class AAbility_Sniper* AbilitySniper;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability", meta = (AllowPrivateAccess = "true"))
-		class AAbility_Blade* AbilityBlade;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability", meta = (AllowPrivateAccess = "true"))
-		class AAbility_AlienGun* Ability_AlienGun;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability")
+		TSubclassOf<class AAbility_BasicPistol> AbilityPistolClass;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability" )
+		class AAbility_BasicPistol* AbilityPistol = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability")
+		TSubclassOf<class AAbility_Shotgun> AbilityShotgunClass;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability" )
+		class AAbility_Shotgun* AbilityShotgun = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability")
+		TSubclassOf<class AAbility_Sniper> AbilitySniperClass;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability" )
+		class AAbility_Sniper* AbilitySniper = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability")
+		TSubclassOf<class AAbility_Blade> AbilityBladeClass;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability" )
+		class AAbility_Blade* AbilityBlade = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability")
+		TSubclassOf<class AAbility_AlienGun> Ability_AlienGunClass;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability" )
+		class AAbility_AlienGun* Ability_AlienGun = nullptr;
 
 		// Bomb Category
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability", meta = (AllowPrivateAccess = "true"))
-		class AAbility_BlackHoleBomb* Ability_BlackHoleBomb;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability")
+		TSubclassOf<class AAbility_BlackHoleBomb> Ability_BlackHoleBombClass;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability" )
+		class AAbility_BlackHoleBomb* Ability_BlackHoleBomb = nullptr;
 
 		// Hilo Category
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability", meta = (AllowPrivateAccess = "true"))
-		class AAbility_WireTrap* Ability_WireTrap;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability")
+		TSubclassOf<class AAbility_WireTrap> Ability_WireTrapClass;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability" )
+		class AAbility_WireTrap* Ability_WireTrap = nullptr;
 		// Shadow Category
 		
 		// Dimension Category
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability", meta = (AllowPrivateAccess = "true"))
-		class AAbility_ReversePorjectiles* Ability_ReversePorjectiles;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability", meta = (AllowPrivateAccess = "true"))
-		class AAbility_Teleport* Ability_Teleport;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability")
+		TSubclassOf<class AAbility_ReversePorjectiles> Ability_ReversePorjectilesClass;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability" )
+		class AAbility_ReversePorjectiles* Ability_ReversePorjectiles = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability")
+		TSubclassOf<class AAbility_Teleport> Ability_TeleportClass;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability" )
+		class AAbility_Teleport* Ability_Teleport = nullptr;
 
 		// Time Category
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability", meta = (AllowPrivateAccess = "true"))
-		class AAbility_BulletTime* Ability_BulletTime;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability", meta = (AllowPrivateAccess = "true"))
-		class AAbility_FForward* Ability_FForward;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability")
+		TSubclassOf<class AAbility_BulletTime> Ability_BulletTimeClass;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability" )
+		class AAbility_BulletTime* Ability_BulletTime = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability")
+		TSubclassOf<class AAbility_FForward> Ability_FForwardClass;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability" )
+		class AAbility_FForward* Ability_FForward = nullptr;
 	
 	// Hacker Category
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability", meta = (AllowPrivateAccess = "true"))
-		class AAbility_Paralyze* Ability_Paralyze;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability", meta = (AllowPrivateAccess = "true"))
-		class AAbility_Open_Command* Ability_Open_Command;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability")
+		TSubclassOf<class AAbility_Paralyze> Ability_ParalyzeClass;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability" )
+		class AAbility_Paralyze* Ability_Paralyze = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability")
+		TSubclassOf<class AAbility_Open_Command> Ability_Open_CommandClass;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability" )
+		class AAbility_Open_Command* Ability_Open_Command = nullptr;
 	
 	// Summoner Category
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability", meta = (AllowPrivateAccess = "true"))
-		class AAbility_Sum_MomFoot* Ability_Sum_MomFoot;
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability", meta = (AllowPrivateAccess = "true"))
-		class AAbility_Sum_Rabbit* Ability_Sum_Rabbit;
-		// Tool Category
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability")
+		TSubclassOf<class AAbility_Sum_MomFoot> Ability_Sum_MomFootClass;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability" )
+		class AAbility_Sum_MomFoot* Ability_Sum_MomFoot = nullptr;
 
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability")
+		TSubclassOf<class AAbility_Sum_Rabbit> Ability_Sum_RabbitClass;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Ability" )
+		class AAbility_Sum_Rabbit* Ability_Sum_Rabbit = nullptr;
+		// Tool Category
 
 public:
 	// Check if abilitycode exist
-	// REDO
-	bool CheckAbility(int slot);
+	UFUNCTION()
+		void SetPlayer(AMain* aplayer);
+	UFUNCTION()
+		void SetWorld(UWorld* currentWorld);
+
+	UFUNCTION(BlueprintCallable, Category = "Effect")
+		bool CheckAbility(int slot);
 
 	// Call abilities to activate
 	UData_AbilityFeedBackInfo* ActivateAbility(class UData_AbilityRequiredInfo* requiredInfo);
 	
-	// let ALUS processes feedback -> update all values
-	// *************************************
+	UFUNCTION(BlueprintCallable, Category = "Effect")
+		void CalculateCooldown(float PlayerFireRate, float WeaponFireRate);
 
-	void CalculateCooldown(float PlayerFireRate, float WeaponFireRate);
-
-	void ResetAllVariables();
-
-	// Further function to each abilities
-	// TP
-	AAbility_Teleport* GetTPAbility();
+	UFUNCTION(BlueprintCallable, Category = "Effect")
+		void ResetAllVariables();
 
 };
