@@ -8,7 +8,7 @@
 #include "GeneralMapComponent.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AGeneralMapComponent : public AActor
+class LIMITLESS_API AGeneralMapComponent : public AActor
 {
 	GENERATED_BODY()
 	
@@ -22,8 +22,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		class UBoxComponent* CollisionComp;
 
-	// EditAnywhere, BlueprintReadWrite, Category = "Scene"
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		class UStaticMeshComponent* BuildingBody;
 
@@ -32,10 +30,10 @@ protected:
 	virtual void BeginPlay() override;
 
 	// Check if player is in building area
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Area")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Player")
 		bool playerInArea = false;
 
-	UFUNCTION(BlueprintCallable, Category = "Rotation")
+	UFUNCTION(BlueprintCallable, Category = "Player")
 		void SetPlayerInArea(bool isInArea);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Area")
@@ -54,18 +52,9 @@ protected:
 		virtual void PlayerLeaveAreaResponse(AMain* player);
 
 public:	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
-	UFUNCTION()
-		void OnOverlapBegin(class UPrimitiveComponent* OverlappedComp,
+	UFUNCTION(BlueprintCallable, Category = "Building Area overlap")
+		virtual void OnOverlapBegin(class UPrimitiveComponent* OverlappedComp,
 			class AActor* OtherActor, class UPrimitiveComponent* OtherComp,
 			int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-
-	UFUNCTION()
-		// declare overlap end function
-		void OnOverlapEnd(class UPrimitiveComponent* OverlappedComp,
-			class AActor* OtherActor, class UPrimitiveComponent* OtherComp,
-			int32 OtherBodyIndex);
 
 };

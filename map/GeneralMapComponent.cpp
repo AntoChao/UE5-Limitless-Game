@@ -9,8 +9,7 @@
 #include "../Main.h"
 
 // Sets default values
-AGeneralMapComponent::AGeneralMapComponent()
-{
+AGeneralMapComponent::AGeneralMapComponent() {
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -20,10 +19,6 @@ AGeneralMapComponent::AGeneralMapComponent()
 	// Use a sphere as a simple collision representation
 	CollisionComp = CreateDefaultSubobject<UBoxComponent>(TEXT("Building Area"));
 	CollisionComp->SetupAttachment(SceneComponent);
-
-	// Players can't walk on it
-	CollisionComp->SetWalkableSlopeOverride(FWalkableSlopeOverride(WalkableSlope_Default, 0.f));
-	CollisionComp->CanCharacterStepUpOn = ECB_No;
 
 	// Set as root component
 	// RootComponent = CollisionComp;
@@ -37,35 +32,21 @@ AGeneralMapComponent::AGeneralMapComponent()
 }
 
 // Called when the game starts or when spawned
-void AGeneralMapComponent::BeginPlay()
-{
+void AGeneralMapComponent::BeginPlay() {
 	Super::BeginPlay();
 
 	// overlap event
-	if (CollisionComp)
-	{
-		CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &AGeneralMapComponent::OnOverlapBegin);
-		CollisionComp->OnComponentEndOverlap.AddDynamic(this, &AGeneralMapComponent::OnOverlapEnd);
+	if (IsValid(CollisionComp)) {
+		CollisionComp->OnComponentBeginOverlap.AddUniqueDynamic(this, &AGeneralMapComponent::OnOverlapBegin);
 	}
-	
-	SetRandomRotation();
 }
 
-// Called every frame
-void AGeneralMapComponent::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-}
-
-void AGeneralMapComponent::SetPlayerInArea(bool isInArea)
-{
+void AGeneralMapComponent::SetPlayerInArea(bool isInArea) {
 	playerInArea = isInArea;
 }
 
-void AGeneralMapComponent::SetRandomRotation()
-{
-	if (setRandomLocation)
-	{
+void AGeneralMapComponent::SetRandomRotation() {
+	if (setRandomLocation) {
 		float randomPitch = FMath::RandRange(-180, 180);
 		float randomYaw = FMath::RandRange(-180, 180);
 		float randomRoll = FMath::RandRange(-180, 180);
@@ -78,42 +59,22 @@ void AGeneralMapComponent::SetRandomRotation()
 // is able to add some bonus for certain enemies in certain area
 void AGeneralMapComponent::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp,
 	class AActor* OtherActor, class UPrimitiveComponent* OtherComp,
-	int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	if ((OtherActor != nullptr) && (OtherActor != this) && (OtherComp != nullptr))
-	{
+	int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
+	if ((OtherActor != nullptr) && (OtherActor != this) && (OtherComp != nullptr)) {
 		AMain* player = Cast<AMain>(OtherActor);
 
-		if (IsValid(player))
-		{
+		if (IsValid(player)) {
 			PlayerInAreaResponse(player);
 		}
 	}
 }
 
-void AGeneralMapComponent::OnOverlapEnd(class UPrimitiveComponent* OverlappedComp,
-	class AActor* OtherActor, class UPrimitiveComponent* OtherComp,
-	int32 OtherBodyIndex)
-{
-	if ((OtherActor != nullptr) && (OtherActor != this) && (OtherComp != nullptr))
-	{
-		AMain* player = Cast<AMain>(OtherActor);
-
-		if (IsValid(player))
-		{
-			PlayerLeaveAreaResponse(player);
-		}
-	}
-}
-
-void AGeneralMapComponent::PlayerInAreaResponse(AMain* player)
-{
+void AGeneralMapComponent::PlayerInAreaResponse(AMain* player) {
 	SetPlayerInArea(true);
 	player->SetCurrentFloor(floorType);
 }
 
-void AGeneralMapComponent::PlayerLeaveAreaResponse(AMain* player)
-{
+void AGeneralMapComponent::PlayerLeaveAreaResponse(AMain* player) {
 	SetPlayerInArea(false);
 	player->SetCurrentFloor(floorType);
 }
