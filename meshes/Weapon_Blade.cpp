@@ -39,8 +39,8 @@ void AWeapon_Blade::BeginPlay()
 	Super::BeginPlay();
 	
 	// overlap event
-	CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &AWeapon_Blade::OnOverlapBegin);
-	CollisionComp->OnComponentEndOverlap.AddDynamic(this, &AWeapon_Blade::OnOverlapEnd);
+	CollisionComp->OnComponentBeginOverlap.AddUniqueDynamic(this, &AWeapon_Blade::OnOverlapBegin);
+	CollisionComp->OnComponentEndOverlap.AddUniqueDynamic(this, &AWeapon_Blade::OnOverlapEnd);
 	
 	beingUsed = false;
 	OwnByMain = true;
@@ -93,7 +93,7 @@ void AWeapon_Blade::OnOverlapEnd(class UPrimitiveComponent* OverlappedComp,
 	// nothing
 }
 
-void AWeapon_Blade::DoDamage()
+void AWeapon_Blade::DoDamage(AActor* Actor)
 {
 	GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Yellow, TEXT("Doing Damage to enemy"));
 

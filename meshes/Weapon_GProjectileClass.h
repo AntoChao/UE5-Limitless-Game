@@ -11,7 +11,7 @@
 * because the weapon is the one who fire and make sound...
 */
 UCLASS()
-class TRUEPROJECT2_API AWeapon_GProjectileClass : public AWeapon_GeneralClass
+class LIMITLESS_API AWeapon_GProjectileClass : public AWeapon_GeneralClass
 {
 	GENERATED_BODY()
 
@@ -124,7 +124,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spline")
 		float SplineDistance;
 
-	virtual void DoDamage() override;
+	virtual void DoDamage(AActor* Actor) override;
 
 public:
 

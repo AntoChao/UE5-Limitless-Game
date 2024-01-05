@@ -12,7 +12,7 @@
 * because the weapon is the one who fire and make sound...
 */
 UCLASS()
-class TRUEPROJECT2_API AWeapon_GeneralClass : public ACharacter
+class LIMITLESS_API AWeapon_GeneralClass : public ACharacter
 {
 	GENERATED_BODY()
 
@@ -52,7 +52,7 @@ protected:
 
 	// Owner -> in order to separate if the waepon is enemies of main
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		bool OwnByMain;
+		bool OwnByMain = false;
 
 	// only call it in begin play if it is necessary
 	UFUNCTION(BlueprintCallable)
@@ -88,7 +88,7 @@ protected:
 		UAnimMontage* AnimMontage_DieEffect;
 
 	UFUNCTION(BlueprintCallable)
-		virtual void DoDamage();
+		virtual void DoDamage(AActor* Actor);
 
 public:
 	UFUNCTION(BlueprintCallable)

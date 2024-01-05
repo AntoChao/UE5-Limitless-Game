@@ -11,8 +11,7 @@
 #include "../All_Enemies/EnemyClass.h"
 
 // Sets default values
-AWeapon_ReverseProjectile::AWeapon_ReverseProjectile()
-{
+AWeapon_ReverseProjectile::AWeapon_ReverseProjectile() {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -24,10 +23,7 @@ AWeapon_ReverseProjectile::AWeapon_ReverseProjectile()
 	CollisionComp->SetupAttachment(GetCapsuleComponent());
 	// RootComponent = CollisionComp;
 
-	// overlap event
-	CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &AWeapon_ReverseProjectile::OnOverlapBegin);
-	CollisionComp->OnComponentEndOverlap.AddDynamic(this, &AWeapon_ReverseProjectile::OnOverlapEnd);
-
+	
 	//Body = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("EnemyBody"));
 	Body = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Body"));
 	Body->SetOnlyOwnerSee(false);
@@ -38,9 +34,11 @@ AWeapon_ReverseProjectile::AWeapon_ReverseProjectile()
 }
 
 // Called when the game starts or when spawned
-void AWeapon_ReverseProjectile::BeginPlay()
-{
+void AWeapon_ReverseProjectile::BeginPlay() {
 	Super::BeginPlay();
+
+	// overlap event
+	CollisionComp->OnComponentBeginOverlap.AddUniqueDynamic(this, &AWeapon_ReverseProjectile::OnOverlapBegin);
 
 	beingUsed = false;
 	OwnByMain = true;
@@ -53,20 +51,17 @@ void AWeapon_ReverseProjectile::BeginPlay()
 
 	LifeSpan = 10.0f;
 	StartDieTimer();
-
 }
 
-void AWeapon_ReverseProjectile::Tick(float DeltaTime)
-{
+void AWeapon_ReverseProjectile::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
-
-	if (bNormalFire)
-	{ 
+	/*
+	if (bNormalFire) { 
 		NormalFire(DeltaTime);
 	}
 
 	UpdateLocationVariable();
-	UpdateCollisionCompPosition();
+	UpdateCollisionCompPosition();*/
 }
 
 void AWeapon_ReverseProjectile::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp,
@@ -78,31 +73,20 @@ void AWeapon_ReverseProjectile::OnOverlapBegin(class UPrimitiveComponent* Overla
 		// if (OtherActor->IsA(AMain::StaticClass()))
 		if (OtherActor->GetClass()->IsChildOf(AEnemyClass::StaticClass()))
 		{
-			// GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Collide with main"));
 			Enemy = Cast<AEnemyClass>(OtherActor);
 			DieEffect();
-
-			// Destroy();
 		}
 	}
 
 }
 
-void AWeapon_ReverseProjectile::OnOverlapEnd(class UPrimitiveComponent* OverlappedComp,
-	class AActor* OtherActor, class UPrimitiveComponent* OtherComp,
-	int32 OtherBodyIndex)
-{
-	// nothing
-}
-
 // should override dodamage -> apply radial damage
-void AWeapon_ReverseProjectile::DoDamage()
-{
+void AWeapon_ReverseProjectile::DoDamage(AActor* Actor) {
 	// need to test, some how it deal multiple damage to main
-	/*
+	
 	UGameplayStatics::ApplyRadialDamage(
 		GetWorld(),
-		BaseDamage,
+		DamageComponent->GetDamage(),
 		CollisionLocation,
 		ExplotionRadius,
 		UDamageType::StaticClass(),
@@ -111,21 +95,16 @@ void AWeapon_ReverseProjectile::DoDamage()
 		nullptr,
 		false,
 		ECollisionChannel::ECC_Visibility);
-	*/
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Do Damage"));
-
 }
 
-void AWeapon_ReverseProjectile::DieEffect()
-{
+void AWeapon_ReverseProjectile::DieEffect() {
 	Super::DieEffect();
 	
-	DoDamage();
+	DoDamage(Target);
 	
 	Destroy();
 }
 
-void AWeapon_ReverseProjectile::ReachLocationEffect()
-{
+void AWeapon_ReverseProjectile::ReachLocationEffect() {
 	Destroy();
 }

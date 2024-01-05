@@ -7,7 +7,7 @@
 #include "Weapon_ReverseProjectile.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AWeapon_ReverseProjectile : public AWeapon_GProjectileClass
+class LIMITLESS_API AWeapon_ReverseProjectile : public AWeapon_GProjectileClass
 {
 	GENERATED_BODY()
 	
@@ -16,17 +16,17 @@ public:
 	AWeapon_ReverseProjectile();
 
 protected:
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Stats")
 		class AActor* Main;
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	virtual void Tick(float DeltaTime) override;
+	virtual void DoDamage(AActor* Actor) override;
 
-	virtual void DoDamage() override;
-
-	float ExplotionRadius = 300.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Stats")
+		float ExplotionRadius = 100.0f;
 
 	virtual void DieEffect() override;
 
@@ -38,11 +38,5 @@ public:
 		virtual void OnOverlapBegin(class UPrimitiveComponent* OverlappedComp,
 			class AActor* OtherActor, class UPrimitiveComponent* OtherComp,
 			int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-
-	UFUNCTION(BlueprintCallable)
-		virtual void OnOverlapEnd(class UPrimitiveComponent* OverlappedComp,
-			class AActor* OtherActor, class UPrimitiveComponent* OtherComp,
-			int32 OtherBodyIndex);
-
 
 };

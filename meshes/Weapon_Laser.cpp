@@ -24,9 +24,7 @@ AWeapon_Laser::AWeapon_Laser()
 	CollisionComp->SetupAttachment(GetCapsuleComponent());
 	// RootComponent = CollisionComp;
 
-	// overlap event
-	CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &AWeapon_Laser::OnOverlapBegin);
-	CollisionComp->OnComponentEndOverlap.AddDynamic(this, &AWeapon_Laser::OnOverlapEnd);
+	
 
 	//Body = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("EnemyBody"));
 	Body = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Body"));
@@ -41,6 +39,10 @@ AWeapon_Laser::AWeapon_Laser()
 void AWeapon_Laser::BeginPlay()
 {
 	Super::BeginPlay();
+
+	// overlap event
+	CollisionComp->OnComponentBeginOverlap.AddUniqueDynamic(this, &AWeapon_Laser::OnOverlapBegin);
+	CollisionComp->OnComponentEndOverlap.AddUniqueDynamic(this, &AWeapon_Laser::OnOverlapEnd);
 
 	beingUsed = false;
 	// BaseDamage = 5.0f;
@@ -62,19 +64,14 @@ void AWeapon_Laser::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp,
 
 	if ((OtherActor != nullptr) && (OtherActor != this) && (OtherComp != nullptr))
 	{
-		// if (OtherActor->GetClass()->IsChildOf(AAllCharactersClass::StaticClass()))
 		if (OtherActor->IsA(AMain::StaticClass()))
 		{
 			Main = Cast<AMain>(OtherActor);
 			if (IsValid(Main) && !Main->isMainDetecting())
 			{
-				DoDamage();
+				DoDamage(Main);
 				Destroy();
 			}
-		}
-		else
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, TEXT("Should Not Apply Damage"));
 		}
 	}
 }

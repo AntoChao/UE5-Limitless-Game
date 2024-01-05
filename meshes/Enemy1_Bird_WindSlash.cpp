@@ -23,9 +23,8 @@ AEnemy1_Bird_WindSlash::AEnemy1_Bird_WindSlash()
 	RootComponent = CollisionComp;
 
 	// overlap event
-	CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &AEnemy1_Bird_WindSlash::OnOverlapBegin);
-	CollisionComp->OnComponentEndOverlap.AddDynamic(this, &AEnemy1_Bird_WindSlash::OnOverlapEnd);
-
+	CollisionComp->OnComponentBeginOverlap.AddUniqueDynamic(this, &AEnemy1_Bird_WindSlash::OnOverlapBegin);
+	CollisionComp->OnComponentEndOverlap.AddUniqueDynamic(this, &AEnemy1_Bird_WindSlash::OnOverlapEnd);
 
 	//Body = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("EnemyBody"));
 	Body = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponBody"));

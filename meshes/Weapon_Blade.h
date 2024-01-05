@@ -7,7 +7,7 @@
 #include "Weapon_Blade.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AWeapon_Blade : public AWeapon_GeneralClass
+class LIMITLESS_API AWeapon_Blade : public AWeapon_GeneralClass
 {
 	GENERATED_BODY()
 	
@@ -25,7 +25,7 @@ protected:
 		
 	// declare animation and sound -> then apply then to parent funcion playanimation and play sound
 public:
-	virtual void DoDamage() override;
+	virtual void DoDamage(AActor* Actor) override;
 
 	void usingBlade(bool modifier);
 	

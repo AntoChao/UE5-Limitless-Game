@@ -11,8 +11,7 @@
 #include "../All_Enemies/EnemyClass.h"
 
 // Sets default values
-AWeapon_MomFoot::AWeapon_MomFoot()
-{
+AWeapon_MomFoot::AWeapon_MomFoot() {
 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -24,10 +23,6 @@ AWeapon_MomFoot::AWeapon_MomFoot()
 	CollisionComp->SetupAttachment(GetCapsuleComponent());
 	// RootComponent = CollisionComp;
 
-	// overlap event
-	CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &AWeapon_MomFoot::OnOverlapBegin);
-	CollisionComp->OnComponentEndOverlap.AddDynamic(this, &AWeapon_MomFoot::OnOverlapEnd);
-
 	//Body = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("EnemyBody"));
 	Body = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Body"));
 	Body->SetOnlyOwnerSee(false);
@@ -38,9 +33,11 @@ AWeapon_MomFoot::AWeapon_MomFoot()
 }
 
 // Called when the game starts or when spawned
-void AWeapon_MomFoot::BeginPlay()
-{
+void AWeapon_MomFoot::BeginPlay() {
 	Super::BeginPlay();
+
+	// overlap event
+	CollisionComp->OnComponentBeginOverlap.AddUniqueDynamic(this, &AWeapon_MomFoot::OnOverlapBegin);
 
 	beingUsed = false;
 	OwnByMain = true;
@@ -54,29 +51,14 @@ void AWeapon_MomFoot::BeginPlay()
 
 void AWeapon_MomFoot::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp,
 	class AActor* OtherActor, class UPrimitiveComponent* OtherComp,
-	int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	if ((OtherActor != nullptr) && (OtherActor != this) && (OtherComp != nullptr))
-	{
+	int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult) {
+	if ((OtherActor != nullptr) && (OtherActor != this) && (OtherComp != nullptr)) {
 		//if (OtherActor->IsA(AMain::StaticClass()))
-		if (OtherActor->GetClass()->IsChildOf(AEnemyClass::StaticClass()))
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, TEXT("Is colliding with an enemy"));
+		if (OtherActor->GetClass()->IsChildOf(AEnemyClass::StaticClass())) {
 			Enemy = Cast<AEnemyClass>(OtherActor);
-			DoDamage();
-		}
-		else
-		{
-			GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, TEXT("Is not colliding with an enemy"));
+			DoDamage(Enemy);
 		}
 	}
-}
-
-void AWeapon_MomFoot::OnOverlapEnd(class UPrimitiveComponent* OverlappedComp,
-	class AActor* OtherActor, class UPrimitiveComponent* OtherComp,
-	int32 OtherBodyIndex)
-{
-	// nothing
 }
 
 void AWeapon_MomFoot::ReachLocationEffect()

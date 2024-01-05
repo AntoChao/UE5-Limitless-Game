@@ -25,8 +25,8 @@ AWeapon_Missile::AWeapon_Missile()
 	// RootComponent = CollisionComp;
 
 	// overlap event
-	CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &AWeapon_Missile::OnOverlapBegin);
-	CollisionComp->OnComponentEndOverlap.AddDynamic(this, &AWeapon_Missile::OnOverlapEnd);
+	CollisionComp->OnComponentBeginOverlap.AddUniqueDynamic(this, &AWeapon_Missile::OnOverlapBegin);
+	CollisionComp->OnComponentEndOverlap.AddUniqueDynamic(this, &AWeapon_Missile::OnOverlapEnd);
 
 	//Body = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("EnemyBody"));
 	Body = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Body"));
@@ -91,8 +91,6 @@ void AWeapon_Missile::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp,
 		// if (OtherActor->GetClass()->IsChildOf(AAllCharactersClass::StaticClass()))
 		if (OtherActor->IsA(AMain::StaticClass()))
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, TEXT("JAJAJJA"));
-
 			// GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, TEXT("Collide with main"));
 
 			Main = Cast<AMain>(OtherActor);
@@ -116,7 +114,7 @@ void AWeapon_Missile::OnOverlapEnd(class UPrimitiveComponent* OverlappedComp,
 }
 
 // should override dodamage -> apply radial damage
-void AWeapon_Missile::DoDamage()
+void AWeapon_Missile::DoDamage(AActor* Actor)
 {
 	// need to test, some how it deal multiple damage to main
 	
@@ -137,7 +135,7 @@ void AWeapon_Missile::DieEffect()
 {
 	// PlayEndAnimation();
 
-	DoDamage();
+	DoDamage(Target);
 	MissileDieEffect();
 
 }

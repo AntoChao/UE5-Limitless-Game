@@ -10,7 +10,7 @@
 * Just a slash which has collision and deal damage to main if collide
 */
 UCLASS()
-class TRUEPROJECT2_API AEnemy1_Bird_WindSlash : public AWeapon_GProjectileClass
+class LIMITLESS_API AEnemy1_Bird_WindSlash : public AWeapon_GProjectileClass
 {
 	GENERATED_BODY()
 	

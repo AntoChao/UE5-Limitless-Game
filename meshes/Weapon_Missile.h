@@ -7,7 +7,7 @@
 #include "Weapon_Missile.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AWeapon_Missile : public AWeapon_GProjectileClass
+class LIMITLESS_API AWeapon_Missile : public AWeapon_GProjectileClass
 {
 	GENERATED_BODY()
 	
@@ -35,7 +35,7 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	virtual void DoDamage() override;
+	virtual void DoDamage(AActor* Actor) override;
 
 	float ExplotionRadius = 300.0f;
 

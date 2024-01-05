@@ -7,7 +7,7 @@
 #include "Weapon_Laser.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AWeapon_Laser : public AWeapon_GProjectileClass
+class LIMITLESS_API AWeapon_Laser : public AWeapon_GProjectileClass
 {
 	GENERATED_BODY()
 	

@@ -65,16 +65,6 @@ void AWeapon_BlackHoleBomb::BeginPlay()
 	PlaySpawnAnimation();
 }
 
-void AWeapon_BlackHoleBomb::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-}
-
-void AWeapon_BlackHoleBomb::CustomTickFunction()
-{
-	Super::CustomTickFunction();
-}
-
 void AWeapon_BlackHoleBomb::PullOverlappedEnemies()
 {
 	TArray<AActor*> OverlappingActors;
@@ -86,11 +76,6 @@ void AWeapon_BlackHoleBomb::PullOverlappedEnemies()
 		{
 			EnemiesToPull.Add(EnemyDelta);
 			BlackHoleEffect(EnemyDelta);
-
-			DrawDebugSphere
-			(
-				GetWorld(), EnemyDelta->GetActorLocation(), 100.0f, 10, FColor::Red, false, 5.0f, 2, 5.0f
-			);
 		}
 	}
 }
@@ -109,11 +94,11 @@ void AWeapon_BlackHoleBomb::BlackHoleEffect(AEnemyClass* AEnemy)
 void AWeapon_BlackHoleBomb::DieEffect()
 {
 	Super::DieEffect();
-	DoDamage();
+	// DoDamage();
 }
 
 // should override dodamage -> does not apply radial damage, just insta kill a small ridius enemies
-void AWeapon_BlackHoleBomb::DoDamage()
+void AWeapon_BlackHoleBomb::DoDamage(AActor* Actor)
 {
 	// Iterate through the actors and apply the pulling force
 	for (AEnemyClass* AEnemy : EnemiesToPull)
@@ -125,6 +110,7 @@ void AWeapon_BlackHoleBomb::DoDamage()
 			if (AEnemy->GetRarity() == EEnemyRarity::ENormal || AEnemy->GetRarity() == EEnemyRarity::ESpecial)
 			{
 				// Apply the 100% kill damage or destroy it directly as it is so OP
+				AEnemy->ExtraDiedAction();
 				AEnemy->Destroy();
 			}
 		}

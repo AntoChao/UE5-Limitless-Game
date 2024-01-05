@@ -7,7 +7,7 @@
 #include "Weapon_Shotgun.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AWeapon_Shotgun : public AWeapon_GeneralClass
+class LIMITLESS_API AWeapon_Shotgun : public AWeapon_GeneralClass
 {
 	GENERATED_BODY()
 	

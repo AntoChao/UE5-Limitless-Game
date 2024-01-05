@@ -11,7 +11,7 @@ The bomb is just a bomb which after X segs, it started to pull over every one
 in X radius toward its
 */
 UCLASS()
-class TRUEPROJECT2_API AWeapon_BlackHoleBomb : public AWeapon_GProjectileClass
+class LIMITLESS_API AWeapon_BlackHoleBomb : public AWeapon_GProjectileClass
 {
 	GENERATED_BODY()
 	
@@ -35,8 +35,6 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	virtual void Tick(float DeltaTime) override;
-	virtual void CustomTickFunction() override;
 
 	// BlackHoleEffect -> start at the beginning to the end
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Black Hole")
@@ -55,7 +53,7 @@ protected:
 
 	// Die effect is just an explotion of blackhole
 	virtual void DieEffect() override;
-	virtual void DoDamage() override;
+	virtual void DoDamage(AActor* Actor) override;
 
 	virtual void ReachLocationEffect() override;
 

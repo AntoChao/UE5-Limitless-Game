@@ -7,7 +7,7 @@
 #include "Shadow_Solder.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AShadow_Solder : public AActor
+class LIMITLESS_API AShadow_Solder : public AActor
 {
 	GENERATED_BODY()
 	

@@ -24,10 +24,6 @@ AWeapon_Gem::AWeapon_Gem()
 	CollisionComp->SetupAttachment(GetCapsuleComponent());
 	// RootComponent = CollisionComp;
 
-	// overlap event
-	CollisionComp->OnComponentBeginOverlap.AddDynamic(this, &AWeapon_Gem::OnOverlapBegin);
-	CollisionComp->OnComponentEndOverlap.AddDynamic(this, &AWeapon_Gem::OnOverlapEnd);
-
 	//Body = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("EnemyBody"));
 	Body = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Body"));
 	Body->SetOnlyOwnerSee(false);
@@ -44,6 +40,10 @@ void AWeapon_Gem::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// overlap event
+	CollisionComp->OnComponentBeginOverlap.AddUniqueDynamic(this, &AWeapon_Gem::OnOverlapBegin);
+	CollisionComp->OnComponentEndOverlap.AddUniqueDynamic(this, &AWeapon_Gem::OnOverlapEnd);
+
 	beingUsed = false;
 	OwnByMain = false;
 	// BaseDamage = 5.0f;
@@ -59,17 +59,14 @@ void AWeapon_Gem::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp,
 	class AActor* OtherActor, class UPrimitiveComponent* OtherComp,
 	int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	//GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, TEXT("Is Colliding with main"));
-
 	if ((OtherActor != nullptr) && (OtherActor != this) && (OtherComp != nullptr))
 	{
-		// if (OtherActor->GetClass()->IsChildOf(AAllCharactersClass::StaticClass()))
 		if (OtherActor->IsA(AMain::StaticClass()))
 		{
 			Main = Cast<AMain>(OtherActor);
 			if (IsValid(Main) && !Main->isMainDetecting())
 			{
-				DoDamage();
+				DoDamage(Main);
 				Destroy();
 			}
 		}
@@ -85,5 +82,7 @@ void AWeapon_Gem::OnOverlapEnd(class UPrimitiveComponent* OverlappedComp,
 
 void AWeapon_Gem::ReachLocationEffect()
 {
+	Super::ReachLocationEffect();
+
 	DieEffect();
 }

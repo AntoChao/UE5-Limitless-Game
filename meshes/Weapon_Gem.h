@@ -7,7 +7,7 @@
 #include "Weapon_Gem.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AWeapon_Gem : public AWeapon_GProjectileClass
+class LIMITLESS_API AWeapon_Gem : public AWeapon_GProjectileClass
 {
 	GENERATED_BODY()
 	
