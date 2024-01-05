@@ -29,7 +29,6 @@ ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 	{
 		return EBTNodeResult::Failed;
 	}
-	Enemy->testing();
 
 	/* the node should not be play animation, it should be attack, the animation is part of the attack
 	* which form by enemies

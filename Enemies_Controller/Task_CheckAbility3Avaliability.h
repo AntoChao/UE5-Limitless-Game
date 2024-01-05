@@ -10,7 +10,7 @@
  * 
  */
 UCLASS()
-class TRUEPROJECT2_API UTask_CheckAbility3Avaliability : public UBTTaskNode
+class LIMITLESS_API UTask_CheckAbility3Avaliability : public UBTTaskNode
 {
 	GENERATED_BODY()
 	

@@ -10,7 +10,7 @@
  * 
  */
 UCLASS()
-class TRUEPROJECT2_API UTask_Ability1Finish : public UBTTaskNode
+class LIMITLESS_API UTask_Ability1Finish : public UBTTaskNode
 {
 	GENERATED_BODY()
 	

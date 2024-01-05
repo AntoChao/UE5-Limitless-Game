@@ -26,79 +26,65 @@
 
 
 
-AAIEnemyClassController::AAIEnemyClassController()
-{
+AAIEnemyClassController::AAIEnemyClassController() {
 	PawnSensing = CreateDefaultSubobject<UPawnSensingComponent>(TEXT("PawnSensing"));
 }
 
-void AAIEnemyClassController::BeginPlay()
-{
+void AAIEnemyClassController::BeginPlay() {
 	Super::BeginPlay();
 	
-	PawnSensing->OnSeePawn.AddDynamic(this, &AAIEnemyClassController::OnSeePawn);
+	PawnSensing->OnSeePawn.AddUniqueDynamic(this, &AAIEnemyClassController::OnSeePawn);
 	
 	SenseMain = false;
 	GotSpecialStatus = false;
 
 	RunBehaviorTree(BehaviorTree);
 }
-void AAIEnemyClassController::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-}
 
-bool AAIEnemyClassController::GetIsSensingPlayer()
-{
+bool AAIEnemyClassController::GetIsSensingPlayer() {
 	return SenseMain;
 }
 
-void AAIEnemyClassController::SetSpecialStatus(bool SpcialStatus)
-{
-	if (SpcialStatus)
-	{
+void AAIEnemyClassController::IsTooCloseToMain(bool bClose) {
+	GetBlackboardComponent()
+		->SetValueAsBool(FName("Main Too Close"), bClose);
+}
+
+void AAIEnemyClassController::SetSpecialStatus(bool SpcialStatus) {
+	if (SpcialStatus) {
 		GetBlackboardComponent()
 			->SetValueAsBool(FName("Got Special Status"), SpcialStatus);
 	}
-	else
-	{
+	else {
 		GetBlackboardComponent()
 			->SetValueAsBool(FName("Got Special Status"), SpcialStatus);
 	}
 }
 
-void AAIEnemyClassController::OnSeePawn(APawn* PlayerPawn)
-{
+void AAIEnemyClassController::OnSeePawn(APawn* PlayerPawn) {
 	AMain* Player = Cast<AMain>(PlayerPawn);
 
-	if (IsValid(Player))
-	{
-		if (Player)
-		{
-			SetCanSeePlayer(true, Player);
-			RunRetriggerableTimer();
-		}
-		else
-		{
-			SetCanSeePlayer(false, Player);
-		}
+	if (IsValid(Player)) {
+		SetCanSeePlayer(true, Player);
+		RunRetriggerableTimer();
+	}
+	else {
+		SetCanSeePlayer(false, Player);
 	}
 }
 
-void AAIEnemyClassController::SetCanSeePlayer(bool SeePlayer, UObject* Player)
-{
-	if (SeePlayer)
-	{
-		
+void AAIEnemyClassController::SetCanSeePlayer(bool SeePlayer, UObject* Player) {
+	if (SeePlayer) {
+
 		SenseMain = SeePlayer;
 
 		GetBlackboardComponent()
 			->SetValueAsBool(FName("Can See Player"), SenseMain);
-		
+
 		GetBlackboardComponent()
 			->SetValueAsObject(FName("Player Target"), Player);
 	}
-	else
-	{
+	else {
 		SenseMain = SeePlayer;
 
 		GetBlackboardComponent()
@@ -106,8 +92,7 @@ void AAIEnemyClassController::SetCanSeePlayer(bool SeePlayer, UObject* Player)
 	}
 }
 
-void AAIEnemyClassController::RunRetriggerableTimer()
-{
+void AAIEnemyClassController::RunRetriggerableTimer() {
 	GetWorld()->GetTimerManager().ClearTimer(RetriggerableTimerHandle);
 
 	FunctionDelegate.BindUFunction(this, FName("SetCanSeePlayer"),
@@ -117,18 +102,15 @@ void AAIEnemyClassController::RunRetriggerableTimer()
 		FunctionDelegate, PawnSensing->SensingInterval * 2.0f, false);
 }
 
-void AAIEnemyClassController::SetStatusCharm(bool GotCharm, class UObject* CharmActor)
-{
-	if (GotCharm)
-	{
+void AAIEnemyClassController::SetStatusCharm(bool GotCharm, class UObject* CharmActor) {
+	if (GotCharm) {
 		GetBlackboardComponent()
 			->SetValueAsBool(FName("Got Status Charm"), GotCharm);
 
 		GetBlackboardComponent()
 			->SetValueAsObject(FName("Charm Target"), CharmActor);
 	}
-	else
-	{
+	else {
 		GetBlackboardComponent()
 			->SetValueAsBool(FName("Got Status Charm"), GotCharm);
 	}

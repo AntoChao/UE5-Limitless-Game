@@ -10,7 +10,7 @@
  * 
  */
 UCLASS()
-class TRUEPROJECT2_API UTask_CheckIfIsUsingAbility2: public UBTTaskNode
+class LIMITLESS_API UTask_CheckIfIsUsingAbility2: public UBTTaskNode
 {
 	GENERATED_BODY()
 	

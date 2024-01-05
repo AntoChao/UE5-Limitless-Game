@@ -17,7 +17,7 @@ class UBlackboardComponent;
 class AMain;
 
 UCLASS()
-class TRUEPROJECT2_API AAIEnemyClassController : public AAIController
+class LIMITLESS_API AAIEnemyClassController : public AAIController
 {
 	GENERATED_BODY()
 	
@@ -42,7 +42,6 @@ protected:
 
 public:
 	void BeginPlay() override;
-	virtual void Tick(float DeltaTime) override;
 
 	UFUNCTION(BlueprintCallable)
 		bool GetIsSensingPlayer();
@@ -54,6 +53,9 @@ public:
 	FTimerDelegate FunctionDelegate;
 	void RunRetriggerableTimer();
 
+	UFUNCTION(BlueprintCallable)
+		void IsTooCloseToMain(bool bClose);
+
 	/*
 	* Set Special Status should have all necesaries parametes for all type of parameters and
 	* store them in to variables for BB to use
@@ -63,7 +65,6 @@ public:
 
 	// Special behavior (affected by any status from main abilities)
 	UFUNCTION(BlueprintCallable)
-		void SetStatusCharm(bool GotCharm, class
-			UObject* Player/*maybe just a FVector or AActor**/);
+		void SetStatusCharm(bool GotCharm, class UObject* Player);
 
 };

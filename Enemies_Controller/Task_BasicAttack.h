@@ -10,7 +10,7 @@
  * 
  */
 UCLASS()
-class TRUEPROJECT2_API UTask_BasicAttack : public UBTTaskNode
+class LIMITLESS_API UTask_BasicAttack : public UBTTaskNode
 {
 	GENERATED_BODY()
 	
