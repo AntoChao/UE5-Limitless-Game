@@ -7,7 +7,7 @@
 #include "data_killfeedbackinfo.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API UData_KillFeedBackInfo : public UDataAsset
+class LIMITLESS_API UData_KillFeedBackInfo : public UDataAsset
 {
 	GENERATED_BODY()
 

@@ -37,7 +37,7 @@ Ability Info:
 */
 
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
-class TRUEPROJECT2_API UData_AbilityRequiredInfo : public UDataAsset
+class LIMITLESS_API UData_AbilityRequiredInfo : public UDataAsset
 {
 	GENERATED_BODY()
 
