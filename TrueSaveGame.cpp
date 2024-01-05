@@ -3,61 +3,48 @@
 
 #include "TrueSaveGame.h"
 
-UTrueSaveGame::UTrueSaveGame()
-{
+UTrueSaveGame::UTrueSaveGame() {
 }
 
-ELanguageSelected UTrueSaveGame::GetGameLanguageSaved()
-{
+ELanguageSelected UTrueSaveGame::GetGameLanguageSaved() {
 	return GameLanguageSaved;
 }
 
-void UTrueSaveGame::SetGameLanguageSaved(ELanguageSelected ALanguage)
-{
+void UTrueSaveGame::SetGameLanguageSaved(ELanguageSelected ALanguage) {
 	GameLanguageSaved = ALanguage;
 }
 
-EAbilityCode UTrueSaveGame::GetMainWeapon()
-{
+EAbilityCode UTrueSaveGame::GetMainWeapon() {
 	return WeaponSaved;
 }
-void UTrueSaveGame::SetMainWeapon(EAbilityCode AbilityChosen)
-{
+void UTrueSaveGame::SetMainWeapon(EAbilityCode AbilityChosen) {
 	WeaponSaved = AbilityChosen;
 }
 
-EAbilityCode UTrueSaveGame::GetMainAbilityOne()
-{
+EAbilityCode UTrueSaveGame::GetMainAbilityOne() {
 	return AbilityOneSaved;
 }
-void UTrueSaveGame::SetMainAbilityOne(EAbilityCode AbilityChosen)
-{
+void UTrueSaveGame::SetMainAbilityOne(EAbilityCode AbilityChosen) {
 	AbilityOneSaved = AbilityChosen;
 }
 
-EAbilityCode UTrueSaveGame::GetMainAbilityTwo()
-{
+EAbilityCode UTrueSaveGame::GetMainAbilityTwo() {
 	return AbilityTwoSaved;
 }
-void UTrueSaveGame::SetMainAbilityTwo(EAbilityCode AbilityChosen)
-{
+void UTrueSaveGame::SetMainAbilityTwo(EAbilityCode AbilityChosen) {
 	AbilityTwoSaved = AbilityChosen;
 }
 
-EAbilityCode UTrueSaveGame::GetMainAbilityThree()
-{
+EAbilityCode UTrueSaveGame::GetMainAbilityThree() {
 	return AbilityThreeSaved;
 }
-void UTrueSaveGame::SetMainAbilityThree(EAbilityCode AbilityChosen)
-{
+void UTrueSaveGame::SetMainAbilityThree(EAbilityCode AbilityChosen) {
 	AbilityThreeSaved = AbilityChosen;
 }
 
-EAbilityCode UTrueSaveGame::GetMainAbilityFour()
-{
+EAbilityCode UTrueSaveGame::GetMainAbilityFour() {
 	return AbilityFourSaved;
 }
-void UTrueSaveGame::SetMainAbilityFour(EAbilityCode AbilityChosen)
-{
+void UTrueSaveGame::SetMainAbilityFour(EAbilityCode AbilityChosen) {
 	AbilityFourSaved = AbilityChosen;
 }

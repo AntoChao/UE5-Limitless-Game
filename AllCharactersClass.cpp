@@ -23,8 +23,7 @@
 #include "WidgetsBase/PlayerStatsUMG.h"
 
 // Sets default values
-AAllCharactersClass::AAllCharactersClass()
-{
+AAllCharactersClass::AAllCharactersClass() {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -34,19 +33,22 @@ AAllCharactersClass::AAllCharactersClass()
 }
 
 // Called when the game starts or when spawned
-void AAllCharactersClass::BeginPlay()
-{
+void AAllCharactersClass::BeginPlay() {
 	Super::BeginPlay();
 
 	// Set game instance
 	GameInstance = Cast<UTrueGame2Instance>(UGameplayStatics::GetGameInstance(this));
 
-	// set power basic stats
-	PowerComponent->SetPower(5.0f);
-	PowerComponent->SetCharacCritChance(0.0f);
-	PowerComponent->SetCharacCritMultiplier(1.0f);
-	PowerComponent->SetCharacAttackRate(1.0f);
+	InitCharacHealth(initHealth);
 
+	// set power basic stats
+	if (IsValid(PowerComponent)) {
+		PowerComponent->SetPower(initPower);
+		PowerComponent->SetCharacCritChance(initCritChance);
+		PowerComponent->SetCharacCritMultiplier(initCritMult);
+		PowerComponent->SetCharacAttackRate(initAttackSpeed);
+	}
+	
 	// Special Status
 	// Stun
 	IsStunned = false;
@@ -58,44 +60,34 @@ void AAllCharactersClass::BeginPlay()
 	SegsForMove = 0.0f;
 	StrengthForMove = 0.0f;
 
-	// Speed
-	DefaultMoveSpeed = 700.0f;
-	MoveSpeed = DefaultMoveSpeed;
+	HealthRegenerate();
 
-	DefaultRunSpeed = 300.0f;
-	DefaultSpeedBoost = 10.0f;
-	DefaultStatusSpeedBoost = 10.0f;
+	// the trace detection ignore self
+	// DefaultResponseParam.AddIgnoredActor(this);
 }
 
 // EndPlay
-void AAllCharactersClass::EndPlay(const EEndPlayReason::Type EndPlayReason)
-{
+void AAllCharactersClass::EndPlay(const EEndPlayReason::Type EndPlayReason) {
 	Super::EndPlay(EndPlayReason);
 }
 
 // Called every frame
-void AAllCharactersClass::Tick(float DeltaTime)
-{
+void AAllCharactersClass::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 
-	if (bGotForceToMove())
-	{
-		if (bForcedToMoveInTime)
-		{
+	if (bGotForceToMove()) {
+		if (bForcedToMoveInTime) {
 			ForceToMoveInTime(DeltaTime);
 		}
-		else 
-		{
-			if (bForcedToMoveByStrength)
-			{
+		else  {
+			if (bForcedToMoveByStrength) {
 				ForceToMoveByStrength(DeltaTime);
 			}
 		}
 	}
 }
 
-void AAllCharactersClass::CustomTickFunction()
-{
+void AAllCharactersClass::CustomTickFunction() {
 	GetWorldTimerManager().SetTimer(TickSimulatorTimer, this,
 		&AAllCharactersClass::CustomTickFunction, TickSimulateTime, true);
 
@@ -105,47 +97,48 @@ void AAllCharactersClass::CustomTickFunction()
 
 // return Componenets values
 // Health
-float AAllCharactersClass::GiveHealthPercentage()
-{
+float AAllCharactersClass::GiveHealthPercentage() {
 	return Health->GetHealthPercentage();
 }
-float AAllCharactersClass::GetCharacterHealth()
-{
+float AAllCharactersClass::GetCharacterHealth() {
 	return Health->GetHealth();
+}
+float AAllCharactersClass::GetCharacterMaxHealth() {
+	return Health->GetMaxHealth();
 }
 
 // XP
-void AAllCharactersClass::UpdateXP(float modifier)
-{
-	XPComponent->ReceiveXP(modifier);
+void AAllCharactersClass::UpdateXP(float modifier) {
+	if (IsValid(XPComponent)) {
+		XPComponent->ReceiveXP(modifier);
+	}
 }
-bool AAllCharactersClass::IsAbleToSpendXP(float xpAmount)
-{
+bool AAllCharactersClass::IsAbleToSpendXP(float xpAmount) {
 	return XPComponent->isAbleToBuy(xpAmount);
 }
-float AAllCharactersClass::GiveXPPercentage()
-{
+float AAllCharactersClass::GiveXPPercentage() {
 	return XPComponent->GetXPPercentage();
 }
 
-FText AAllCharactersClass::GiveLevelText()
-{
+FText AAllCharactersClass::GiveLevelText() {
 	return XPComponent->GetLevelText();
 }
-
+float AAllCharactersClass::GiveXP() {
+	return XPComponent->GetXP();
+}
+float AAllCharactersClass::GiveXPRequired() {
+	return XPComponent->GetTotalXPRequired();
+}
 
 
 // update health, power...stats depending level
-void AAllCharactersClass::UpdateBasicStatsByLevelingUp()
-{
+void AAllCharactersClass::UpdateBasicStatsByLevelingUp() {
 	return;
 }
 
-void AAllCharactersClass::Detect()
-{
+void AAllCharactersClass::Detect() {
 	//Expose function, should not be an attack
-	if (IsValid(FirstPersonCamaraComponent))
-	{
+	if (IsValid(FirstPersonCamaraComponent)) {
 		Start = FirstPersonCamaraComponent->GetComponentLocation();
 		ForwardVector = FirstPersonCamaraComponent->GetForwardVector();
 		End = ((ForwardVector * 200000.f) + Start);
@@ -158,78 +151,58 @@ void AAllCharactersClass::Detect()
 	}
 }
 
-void AAllCharactersClass::DetectReaction()
-{
+void AAllCharactersClass::DetectReaction() {
 	// let the enemy health bar to be visible
-	if (Hit.bBlockingHit)
-	{
-		if (IsValid(Hit.GetActor()))
-		{
-			AEnemyClass* EnemyDelta = Cast<AEnemyClass>(Hit.GetActor());
-			if (IsValid(EnemyDelta))
-			{
-				EnemyDelta->SetHealthBarVisible();
+	if (Hit.bBlockingHit) {
+		if (IsValid(Hit.GetActor())) {
+			AAllCharactersClass* EnemyDelta = Cast<AAllCharactersClass>(Hit.GetActor());
+			if (IsValid(EnemyDelta)) {
+				EnemyDelta->BeDetected();
 			}
 		}
 	}
 }
 
-FVector AAllCharactersClass::GetForwardDirection()
-{
+void AAllCharactersClass::BeDetected() {
+	return;
+}
+
+FVector AAllCharactersClass::GetForwardDirection() {
 	return ForwardVector;
 }
 
-void AAllCharactersClass::Move(const FInputActionValue& Value)
-{
+void AAllCharactersClass::Move(const FInputActionValue& Value) {
 	// input is a Vector2D
 	FVector2D MovementVector = Value.Get<FVector2D>();
 
-	if (Controller != nullptr)
-	{
+	if (Controller != nullptr) {
 		// add movement 
 		AddMovementInput(GetActorForwardVector(), MovementVector.Y);
 		AddMovementInput(GetActorRightVector(), MovementVector.X);
 	}
 }
-void AAllCharactersClass::Look(const FInputActionValue& Value)
-{
+
+void AAllCharactersClass::Look(const FInputActionValue& Value) {
 	// input is a Vector2D
 	FVector2D LookAxisVector = Value.Get<FVector2D>();
 
-	if (Controller != nullptr)
-	{
+	if (Controller != nullptr) {
 		// add yaw and pitch input to controller
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
 	}
 }
-//custom jump, need to be upgraded 
-/*
-void APlayerCharacter::Jump()
-{
-	ttps://www.youtube.com/watch?v=oe2vPXvFLpI
-}
 
-void APlayerCharacter::JumpEnd()
-{
-	return;
-}
-*/
-
-void AAllCharactersClass::Run()
-{
-	if (!isCrouching)
-	{
-		if (!isRunning)
-		{
+void AAllCharactersClass::Run() {
+	if (!isCrouching) {
+		if (!isRunning && ableToRun) {
 			RunSpeed = DefaultRunSpeed * RunSpeedRatio;
 			ChangeCurrentMoveSpeed();
 			isRunning = true;
 		}
 	}
 }
-void AAllCharactersClass::RunEnd()
-{
+void AAllCharactersClass::RunEnd() {
 	RunSpeed = 0.0f;
 	ChangeCurrentMoveSpeed();
 	isRunning = false;
@@ -239,40 +212,37 @@ void AAllCharactersClass::RunEnd()
 	1 : No infinite 
 	2 : Distance should be progresive
 */
-void AAllCharactersClass::Dash()
-{
-	const FVector ForwardDir = this->GetActorRotation().Vector();
-	LaunchCharacter(ForwardDir * DashDistance, true, true);
+void AAllCharactersClass::Dash() {
+	if (isAbleToDash) {
+		const FVector ForwardDir = this->GetActorRotation().Vector();
+		LaunchCharacter(ForwardDir * DashDistance, true, true);
+	}
 }
-void AAllCharactersClass::CrouchStart()
-{
-	if (isRunning)
-	{
+
+void AAllCharactersClass::CrouchStart() {
+	if (isRunning) {
 		isSliding = true;	
-		if ((GetCharacterMovement()->MaxWalkSpeed > 200.0f) && (bToSlide))
-		{
+		if ((GetCharacterMovement()->MaxWalkSpeed > 200.0f) && (bToSlide)) {
 			Sliding();
 		}
-		else
-		{
+		else {
 			CrouchEnd();
 		}
 	}
-	else
-	{
+	else {
 		isCrouching = true;
 		this->FirstPersonCamaraComponent->SetRelativeLocation(CameraLocationCrouch);
+		this->FirstPersonCamaraComponent->SetRelativeRotation(CameraRotationCrouch);
 	}
 }
-void AAllCharactersClass::CrouchEnd()
-{
-	if (isCrouching)
-	{
+
+void AAllCharactersClass::CrouchEnd() {
+	if (isCrouching) {
 		this->FirstPersonCamaraComponent->SetRelativeLocation(CameraLocationStand);
+		this->FirstPersonCamaraComponent->SetRelativeRotation(CameraRotationStand);
 		isCrouching = false;
 	}
-	else
-	{
+	else {
 		bToSlide = false;
 		isSliding = false;
 		GetWorldTimerManager().SetTimer(SlidingCooldownTimerHandle, this, &AAllCharactersClass::ResetSlidingStatus, 8.0f, false);
@@ -280,132 +250,146 @@ void AAllCharactersClass::CrouchEnd()
 		ChangeCurrentMoveSpeed();
 	}
 }
-void AAllCharactersClass::Sliding()
-{
-	if (isSliding)
-	{
+void AAllCharactersClass::Sliding() {
+	if (isSliding) {
 		ReceiveSpeedBoost(0.99f, 5.0f);
 	}
 }
-void AAllCharactersClass::ResetSlidingStatus()
-{
+void AAllCharactersClass::ResetSlidingStatus() {
 	bToSlide = true;
 }
 
 // Health Component Management
-void AAllCharactersClass::InitCharacHealth(float InitHealth)
-{
-	Health->InitHealth(InitHealth);
+void AAllCharactersClass::InitCharacHealth(float HP) {
+	if (IsValid(Health)) {
+		Health->InitHealth(HP);
+	}
 }
-void AAllCharactersClass::UpdateHealthPoint(float healthModifier)
-{
-	Health->UpdateHealthFloat(healthModifier);
+void AAllCharactersClass::UpdateHealthPoint(float healthModifier) {
+	if (IsValid(Health)) {
+		Health->UpdateHealthFloat(healthModifier);
+	}
 }
-void AAllCharactersClass::UpdateHealthByCurrentPercentage(float healthModifier)
-{
-	Health->UpdateHealthByPercentageOfCurrentHealth(healthModifier);
+void AAllCharactersClass::FullHeal() {
+	if (IsValid(Health)) {
+		Health->RefillMaxHealth();
+	}
 }
-void AAllCharactersClass::UpdateHealthByMaxPercentage(float healthModifier)
-{
-	Health->UpdateHealthByPercentageOfMaxHealth(healthModifier);
+void AAllCharactersClass::UpdateHealthByCurrentPercentage(float healthModifier) {
+	if (IsValid(Health)) {
+		Health->UpdateHealthByPercentageOfCurrentHealth(healthModifier);
+	}
 }
-void AAllCharactersClass::UpdateMaxHealth(float healthModifier, float maxHealthModifier)
-{
-	Health->UpdateMaxHealth(healthModifier, maxHealthModifier);
+void AAllCharactersClass::UpdateHealthByMaxPercentage(float healthModifier) {
+	if (IsValid(Health)) {
+		Health->UpdateHealthByPercentageOfMaxHealth(healthModifier);
+	}
+}
+void AAllCharactersClass::UpdateMaxHealth(float healthModifier, float maxHealthModifier) {
+	if (IsValid(Health)) {
+		Health->UpdateMaxHealth(healthModifier, maxHealthModifier);
+	}
+}
+
+// Health Regeneration
+void AAllCharactersClass::HealthRegenerate() {
+	UpdateHealthPoint(HealthPointRegenerate);
+	
+	GetWorldTimerManager().SetTimer(HealthRegenerateTimerHandle, this,
+		&AAllCharactersClass::HealthRegenerate, HealthRegenerateTime, false);
+
 }
 
 // Power Component Management
-UCharacterPowerComponent* AAllCharactersClass::GetCharacterPowerComponent()
-{
+UCharacterPowerComponent* AAllCharactersClass::GetCharacterPowerComponent() {
 	return PowerComponent;
 }
 
-void AAllCharactersClass::UpdateCharacterPowerUp(float PowerValue)
-{
-	PowerComponent->UpdateFlatPower(PowerValue);
+void AAllCharactersClass::UpdateCharacterPowerUp(float PowerValue) {
+	if (IsValid(PowerComponent)) {
+		PowerComponent->UpdateFlatPower(PowerValue);
+	}
 }
-void AAllCharactersClass::UpdateCharacterPowerUpPercentage(float PowerValuePercentage)
-{
-	PowerComponent->UpdatePercentagePower(PowerValuePercentage);
+void AAllCharactersClass::UpdateCharacterPowerUpPercentage(float PowerValuePercentage) {
+	if (IsValid(PowerComponent)) {
+		PowerComponent->UpdatePercentagePower(PowerValuePercentage);
+	}
 }
-void AAllCharactersClass::UpdateCharacterCritChance(float CritChanceValue)
-{
-	PowerComponent->UpdateCritChance(CritChanceValue);
+void AAllCharactersClass::UpdateCharacterCritChance(float CritChanceValue) {
+	if (IsValid(PowerComponent)) {
+		PowerComponent->UpdateCritChance(CritChanceValue);
+	}
 }
-void AAllCharactersClass::UpdateCharacterCritMultiplier(float CritMultiplierValue)
-{
-	PowerComponent->UpdateCritMultiplier(CritMultiplierValue);
+void AAllCharactersClass::UpdateCharacterCritMultiplier(float CritMultiplierValue) {
+	if (IsValid(PowerComponent)) {
+		PowerComponent->UpdateCritMultiplier(CritMultiplierValue);
+	}
 }
-void AAllCharactersClass::UpdateCharacterAttackRate(float AttackRateValue)
-{
-	PowerComponent->UpdateAttackRate(AttackRateValue);
+void AAllCharactersClass::UpdateCharacterAttackRate(float AttackRateValue) {
+	if (IsValid(PowerComponent)) {
+		PowerComponent->UpdateAttackRate(AttackRateValue);
+	}
 }
 
-float AAllCharactersClass::GetPlayerAttackRate()
-{
+float AAllCharactersClass::GetPlayerAttackRate() {
 	return PowerComponent->GetCharacAttackRate();
 }
 
 // Receive Damage:
-bool AAllCharactersClass::isPlayerDied()
-{
-	return Health->GetDied();
+bool AAllCharactersClass::isPlayerDied() {
+	if (IsValid(Health)) {
+		return Health->GetDied();
+	}
+	else {
+		return true;
+	}
 }
 
 // Receive Damage by point or radial damage
 // Be override by main and enemy, main need loop defense artifact, enemy need to give out reward
-float AAllCharactersClass::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
-{
+float AAllCharactersClass::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) {
 	float DamageCaused = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 	return DamageCaused;
 }
 
-void AAllCharactersClass::TrueDied()
-{
+void AAllCharactersClass::TrueDied() {
 	// simulate phisics = true ***********
 	//GetWorldTimerManager().SetTimer(DestroyTimeHandle, this, &AAllCharactersClass::DestroyDelay, 5.0f, false);
 }
 
-void AAllCharactersClass::DestroyDelay()
-{
+void AAllCharactersClass::DestroyDelay() {
 	Destroy();
 }
 
-void AAllCharactersClass::Revive(float percentage)
-{
-	Health->SetDied(false);
-	float deltaAmountHealth = Health->GetMaxHealth() * percentage;
-	InitCharacHealth(deltaAmountHealth);
+void AAllCharactersClass::Revive(float percentage) {
+	if (IsValid(Health)) {
+		Health->SetDied(false);
+		float deltaAmountHealth = Health->GetMaxHealth() * percentage;
+		InitCharacHealth(deltaAmountHealth);
+	}
 }
 
-void AAllCharactersClass::SetIsAbleToFly(bool flyState)
-{
+void AAllCharactersClass::SetIsAbleToFly(bool flyState) {
 	bIsFlying = flyState;
 }
 
 // For widget use -> in order to get percentage for show
-void AAllCharactersClass::SetDashDistance(float initDashDistance)
-{
+void AAllCharactersClass::SetDashDistance(float initDashDistance) {
 	DashDistance = initDashDistance;
 }
-void AAllCharactersClass::SetIsRunning(bool checkRunning)
-{
+void AAllCharactersClass::SetIsRunning(bool checkRunning) {
 	isRunning = checkRunning;
 }
-void AAllCharactersClass::SetIsCrouching(bool checkCrouching)
-{
+void AAllCharactersClass::SetIsCrouching(bool checkCrouching) {
 	isCrouching = checkCrouching;
 }
-void AAllCharactersClass::SetIsSliding(bool checkSliding)
-{
+void AAllCharactersClass::SetIsSliding(bool checkSliding) {
 	isSliding = checkSliding;
 }
-void AAllCharactersClass::SetAbleToSlide(bool modifier)
-{
+void AAllCharactersClass::SetAbleToSlide(bool modifier) {
 	bToSlide = modifier;
 }
-void AAllCharactersClass::SetIsDashing(bool checkDashing)
-{
+void AAllCharactersClass::SetIsDashing(bool checkDashing) {
 	isDashing = checkDashing;
 }
 
@@ -418,44 +402,42 @@ moveSpeedBoost -> also updating the moveSpeed -> but has a timer which going to 
 */
 
 // Speed Control
-void AAllCharactersClass::ChangeCurrentMoveSpeed()
-{
+void AAllCharactersClass::ChangeCurrentMoveSpeed() {
 	MoveSpeed = DefaultMoveSpeed + RunSpeed + SpeedBoost + StatusSpeedBoost + ExtraSpeed;
 	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
 }
-void AAllCharactersClass::ResetAllSpeedFactors()
-{
+void AAllCharactersClass::ResetAllSpeedFactors() {
 	MoveSpeed = DefaultMoveSpeed;
 	RunSpeed = 0.0f;
 	SpeedBoost = 0.0f;
 	StatusSpeedBoost = 0.0f;
+	ableToRun = true;
+
+	ChangeCurrentMoveSpeed();
 }
 
-void AAllCharactersClass::UpdateDefaultMoveSpeed(float ratio)
-{
+void AAllCharactersClass::UpdateDefaultMoveSpeed(float ratio) {
 	// update the ratio
 	UpdateDefaultMoveSpeedRatio(ratio);
 
 	// set the default move speed
-	DefaultMoveSpeed = DefaultMoveSpeed * DefaultMoveSpeedRatio;
-	ChangeCurrentMoveSpeed();
+	if (DefaultMoveSpeed * DefaultMoveSpeedRatio < CharacterMaxSpeed) {
+		DefaultMoveSpeed *= DefaultMoveSpeedRatio;
+		ChangeCurrentMoveSpeed();
+	}
 }
-void AAllCharactersClass::UpdateDefaultMoveSpeedRatio(float ratio)
-{
+void AAllCharactersClass::UpdateDefaultMoveSpeedRatio(float ratio) {
 	DefaultMoveSpeedRatio = DefaultMoveSpeedRatio * ratio;
 }
 
-void AAllCharactersClass::UpdateRunSpeedRatio(float ratio)
-{
+void AAllCharactersClass::UpdateRunSpeedRatio(float ratio) {
 	RunSpeedRatio = RunSpeedRatio * ratio;
 }
-void AAllCharactersClass::ResetRunSpeedRatio()
-{
+void AAllCharactersClass::ResetRunSpeedRatio() {
 	RunSpeedRatio = 1.0f;
 }
 
-void AAllCharactersClass::ReceiveSpeedBoost(float ratio, float SpeedBoosterDuration)
-{
+void AAllCharactersClass::ReceiveSpeedBoost(float ratio, float SpeedBoosterDuration) {
 	// update the speed boost ratio
 	UpdateSpeedBoostRatio(ratio);
 	// calculate the speed boost
@@ -466,19 +448,16 @@ void AAllCharactersClass::ReceiveSpeedBoost(float ratio, float SpeedBoosterDurat
 	GetWorldTimerManager().SetTimer(SpeedBoosterTimerHandle, this,
 		&AAllCharactersClass::ResetSpeedBoost, SpeedBoosterDuration, true);
 }
-void AAllCharactersClass::UpdateSpeedBoostRatio(float ratio)
-{
+void AAllCharactersClass::UpdateSpeedBoostRatio(float ratio) {
 	SpeedBoostRatio = SpeedBoostRatio * ratio;
 }
-void AAllCharactersClass::ResetSpeedBoost()
-{
+void AAllCharactersClass::ResetSpeedBoost() {
 	SpeedBoost = 0.0f;
 	SpeedBoostRatio = 1.0f;
 	ChangeCurrentMoveSpeed();
 }
 
-void AAllCharactersClass::ReceiveStatusSpeedBoost(float statusduration, float ratio)
-{
+void AAllCharactersClass::ReceiveStatusSpeedBoost(float statusduration, float ratio) {
 	// update the speed boost ratio
 	UpdateStatusSpeedBoostRatio(ratio);
 	// calculate the speed boost
@@ -489,125 +468,113 @@ void AAllCharactersClass::ReceiveStatusSpeedBoost(float statusduration, float ra
 	GetWorldTimerManager().SetTimer(StatusSpeedBoostTimer, this,
 		&AAllCharactersClass::ResetStatusSpeedBoost, statusduration, true);
 }
-void AAllCharactersClass::UpdateStatusSpeedBoostRatio(float ratio)
-{
+void AAllCharactersClass::UpdateStatusSpeedBoostRatio(float ratio) {
 	StatusSpeedBoostRatio = StatusSpeedBoostRatio * ratio;
 }
-void AAllCharactersClass::ResetStatusSpeedBoost()
-{
+void AAllCharactersClass::ResetStatusSpeedBoost() {
 	StatusSpeedBoost = 0.0f;
 	StatusSpeedBoostRatio = 1.0f;
 	ChangeCurrentMoveSpeed();
 }
 
-void AAllCharactersClass::UpdateExtraSpeed(float ASpeed)
-{
+void AAllCharactersClass::UpdateExtraSpeed(float ASpeed) {
 	ExtraSpeed = ASpeed;
 	ChangeCurrentMoveSpeed();
 }
 
-void AAllCharactersClass::ResetExtraSpeed()
-{
+void AAllCharactersClass::ResetExtraSpeed() {
 	ExtraSpeed = 0.0f;
 	ChangeCurrentMoveSpeed();
 }
 
+void AAllCharactersClass::Immovilize(float immovilzeTime) {
+	// GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, TEXT("IMMOBILIZE"));
+
+	MoveSpeed = ImmovilizeSpeed;
+	ableToRun = false;
+	GetCharacterMovement()->MaxWalkSpeed = MoveSpeed;
+
+	GetWorldTimerManager().SetTimer(ImmovilizeTimerHandle, this,
+		&AAllCharactersClass::ResetAllSpeedFactors, immovilzeTime, true);
+}
 
 // Position and Rotation
-FVector AAllCharactersClass::GetPlayerPosition()
-{
+FVector AAllCharactersClass::GetPlayerPosition() {
 	return GetWorld()->GetFirstPlayerController()->GetPawn()->GetActorLocation();
 }
 
-FRotator AAllCharactersClass::GetPlayerRotation()
-{
+FRotator AAllCharactersClass::GetPlayerRotation() {
 	return GetWorld()->GetFirstPlayerController()->GetPawn()->GetActorRotation();
 }
 
 // Special Status Control
 // General Status Control
 void AAllCharactersClass::ReceiveSpecialStatus(ESpecialStatus SpecialStatus,
-	float Duration, float modifier, FVector Location)
-{
-	switch (SpecialStatus)
-	{
-		case ESpecialStatus::ETest:
-		{
-			// GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, TEXT("Got Special Status Test"));
+	float Duration, float modifier, FVector Location) {
+	switch (SpecialStatus) {
+		case ESpecialStatus::ETest: {
 			break;
 		}
-		case ESpecialStatus::EStun:
-		{
+		case ESpecialStatus::EStun: {
 			// it is just once time, does not need to check per tick
 			ApplyStunStatus(Duration);
 			break;
 		}
-		case ESpecialStatus::EForceMoveByTime:
-		{
+		case ESpecialStatus::EForceMoveByTime: {
 			StartForceToMoveInTime(Location, Duration);
 			break;
 		}
-		case ESpecialStatus::EForceMoveByStrength:
-		{
+		case ESpecialStatus::EForceMoveByStrength: {
 			StartForceToMoveByStrength(Location, modifier);
 			break;
 		}
-		case ESpecialStatus::ESpeed:
-		{
+		case ESpecialStatus::ESpeed: {
 			ReceiveStatusSpeedBoost(Duration, modifier);
 			break;
 		}
-		default:
-		{
+		default: {
 			break;
 		}
 	}
 }
-bool AAllCharactersClass::isBehaviourChanged()
-{
+bool AAllCharactersClass::isBehaviourChanged() {
 	return IsStunned || bGotForceToMove();
 }
 
 // Stun Status
-void AAllCharactersClass::ApplyStunStatus(float Duration)
-{
+void AAllCharactersClass::ApplyStunStatus(float Duration) {
 	IsStunned = true;
 	GetCharacterMovement()->SetMovementMode(IsStunned ? MOVE_None : MOVE_Walking);
 	GetWorldTimerManager().SetTimer(StunStatusTimer, this,
 		&AAllCharactersClass::ResetStunStatus, Duration, false);
 }
 
-void AAllCharactersClass::ResetStunStatus()
-{
+void AAllCharactersClass::ResetStunStatus() {
 	IsStunned = false;
 	GetCharacterMovement()->SetMovementMode(IsStunned ? MOVE_None : MOVE_Walking);
 }
 
 // Force to Move
 	// For Behaviour Tree to cut the MoveTo() logic flow 
-bool AAllCharactersClass::bGotForceToMove()
-{
+bool AAllCharactersClass::bGotForceToMove() {
 	return bForcedToMoveInTime || bForcedToMoveByStrength;
 }
 	// Force to Move In Time
 	// Call by other class
-void AAllCharactersClass::StartForceToMoveInTime(FVector TargetLocation, float Segs)
-{
+void AAllCharactersClass::StartForceToMoveInTime(FVector TargetLocation, float Segs) {
 	bForcedToMoveInTime = true;
 	ForcedToMoveLocation = TargetLocation;
 	SegsForMove = Segs;
 	
 	// set a timer to reset the status
-	if (bForcedToMoveInTime)
-	{
+	if (bForcedToMoveInTime) {
 		// A timer for finish
 		GetWorldTimerManager().SetTimer(ForToMoveTimer, this,
 			&AAllCharactersClass::ForceToMoveInTimeFinished, SegsForMove, false);
 	}
 }
 	// Need to be called in tick function
-void AAllCharactersClass::ForceToMoveInTime(float DeltaTime)
-{
+void AAllCharactersClass::ForceToMoveInTime(float DeltaTime) {
 	// Calculate the direction and distance to the target location.
 	FVector DirectionToTarget = (ForcedToMoveLocation - GetActorLocation()).GetSafeNormal();
 	float DistanceToTarget = FVector::Dist(ForcedToMoveLocation, GetActorLocation());
@@ -622,23 +589,20 @@ void AAllCharactersClass::ForceToMoveInTime(float DeltaTime)
 	SetActorLocation(GetActorLocation() + MovementIncrement, true);
 }
 
-void AAllCharactersClass::ForceToMoveInTimeFinished()
-{
+void AAllCharactersClass::ForceToMoveInTimeFinished() {
 	bForcedToMoveInTime = false;
 	ForcedToMoveLocation = FVector(0.0f, 0.0f, 0.0f);
 	SegsForMove = 0.0f;
 }
 
 	// Force to Move By Strength
-void AAllCharactersClass::StartForceToMoveByStrength(FVector TargetLocation, float Strength)
-{
+void AAllCharactersClass::StartForceToMoveByStrength(FVector TargetLocation, float Strength) {
 	bForcedToMoveByStrength = true;
 	ForcedToMoveLocation = TargetLocation;
 	StrengthForMove = Strength;
 }
 
-void AAllCharactersClass::ForceToMoveByStrength(float DeltaTime)
-{
+void AAllCharactersClass::ForceToMoveByStrength(float DeltaTime) {
 	// Calculate the direction and distance to the target location.
 	FVector DirectionToTarget = (ForcedToMoveLocation - GetActorLocation()).GetSafeNormal();
 	float DistanceToTarget = FVector::Dist(ForcedToMoveLocation, GetActorLocation());
@@ -649,38 +613,31 @@ void AAllCharactersClass::ForceToMoveByStrength(float DeltaTime)
 	// Move the actor incrementally towards the target location.
 	SetActorLocation(GetActorLocation() + MovementIncrement, true);
 }
-void AAllCharactersClass::ForceToMoveByStrengthFinished()
-{
+void AAllCharactersClass::ForceToMoveByStrengthFinished() {
 	bForcedToMoveByStrength = false;
 	ForcedToMoveLocation = FVector(0.0f, 0.0f, 0.0f);
 	StrengthForMove = 0.0f;
 }
 
-void AAllCharactersClass::SetCurrentFloor(EFloorType AFloorType)
-{
+void AAllCharactersClass::SetCurrentFloor(EFloorType AFloorType) {
 	CurrentFloorType = AFloorType;
 }
 
 // Reset All Variables/ Pointers -> Be overrided by childen class
-void AAllCharactersClass::ResetCharacterStats()
-{
+void AAllCharactersClass::ResetCharacterStats() {
 	return;
 }
 
 // useless
-void AAllCharactersClass::PlaySound(class USoundBase* Sound2Play, FVector Location2Play, FRotator Rotation2Play)
-{
-	if (Sound2Play)
-	{
+void AAllCharactersClass::PlaySound(class USoundBase* Sound2Play, FVector Location2Play, FRotator Rotation2Play) {
+	if (Sound2Play) {
 		UGameplayStatics::PlaySoundAtLocation(GetWorld(), Sound2Play, Location2Play, Rotation2Play);
 	}
 }
 
-void AAllCharactersClass::SpawnNiagara(class UNiagaraSystem* Niagara2Play, FVector Location2Play, FRotator Rotation2Play)
-{
+void AAllCharactersClass::SpawnNiagara(class UNiagaraSystem* Niagara2Play, FVector Location2Play, FRotator Rotation2Play) {
 
-	if (IsValid(Niagara2Play))
-	{
+	if (IsValid(Niagara2Play)) {
 		//GetWorld()->SpawnActor<UNiagaraComponent>(Niagara2Play->GetClass(), Location2Play, Rotation2Play, ActorSpawnParams);
 		UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), Niagara2Play, Location2Play, Rotation2Play);
 	}

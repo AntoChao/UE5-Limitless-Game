@@ -17,7 +17,7 @@
  */
 
 UCLASS()
-class TRUEPROJECT2_API UTrueGame2Instance : public UGameInstance
+class LIMITLESS_API UTrueGame2Instance : public UGameInstance
 {
 	GENERATED_BODY()
 
@@ -42,29 +42,18 @@ protected:
 	// Game State
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GameState")
 		bool JustOpen = true;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GameState")
+		bool JustEnd = true;
 
 	// variables to store
 	// Game State Control
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GameState")
 		EGamePlayState CurrentState = EGamePlayState::EPreparing;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Over")
+		EGameOverReason TheGameOverReason = EGameOverReason::EFailMission;
 
 	// InitMenu
-	
-	/* Options
-	* Video
-	* - Resulotion
-	* Sound
-	* Language
-	*/
-	
-	/* PreGame Selection
-	* Main
-	* - Weapon
-	* - Ability 1
-	* - Ability 2
-	* - Ability 3
-	* - Ability 4
-	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main AbilityCode")
 		EAbilityCode WeaponSelected = EAbilityCode::EShotgun;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main AbilityCode")
@@ -82,19 +71,19 @@ protected:
 	*/
 	// Post Game
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Info")
-		int TotalInGameSegs;
+		int TotalInGameDays;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main Stats")
-		float TotalDamageDealed;
+		int TotalDamageDealed;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main Stats")
 		int TotalEnemiesKilled;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main Stats")
-		float TotalXPLeanrt;
+		int TotalXPLeanrt;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main Stats")
-		float TotalDamageTaken;
+		int TotalDamageTaken;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main Stats")
 		int TotalItemsCollected;
@@ -108,7 +97,6 @@ protected:
 
 public:
 	// Save Game
-
 	UFUNCTION(BlueprintCallable, Category = "SaveGame")
 		void SaveGameLanguageStats(ELanguageSelected ALanguage);
 
@@ -125,12 +113,17 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Game State")
 		void SetJustOpen(bool aState);
 
-	/** Returns the current playing state */
 	UFUNCTION(BlueprintCallable, Category = "Game State")
 		EGamePlayState GetCurrentState() const;
-	/** Sets a new playing state */
 	UFUNCTION(BlueprintCallable, Category = "Game State")
 		void SetCurrentState(EGamePlayState NewState);
+
+	// Game Over
+	UFUNCTION(BlueprintCallable, Category = "Game Over")
+		EGameOverReason GetGameOverReason();
+	UFUNCTION(BlueprintCallable, Category = "Game Over")
+		void SetGameOverReason(EGameOverReason NewReason);
+
 	// setters and getters for variables
 	UFUNCTION(BlueprintCallable, Category = "Main AbilityCode")
 		EAbilityCode GetMainWeapon();
@@ -156,7 +149,7 @@ public:
 	// PostGame stuff
 	// Setters and getters for Postgame stuff
 	UFUNCTION(BlueprintCallable, Category = "PostGame Stats")
-		void SetTotalInGameSegs(int TotalGameTime);
+		void SetTotalInGameDays(float TotalGameDays);
 	UFUNCTION(BlueprintCallable, Category = "PostGame Stats")
 		void SetTotalDamageDealed(float DamagedDealed);
 	UFUNCTION(BlueprintCallable, Category = "PostGame Stats")

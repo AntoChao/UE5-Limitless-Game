@@ -11,34 +11,30 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "HeadMountedDisplayFunctionLibrary.h"
 #include "TrueGame2Instance.h"
-#include "Main.h"
 
-AMainController::AMainController()
-{
+AMainController::AMainController() {
 
 }
 
-void AMainController::BeginPlay()
-{
+void AMainController::BeginPlay() {
 	Super::BeginPlay();
 	
 	// Add Input Mapping Context Original
-	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(this->GetLocalPlayer()))
-	{
+	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(this->GetLocalPlayer())) {
 		Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		SetupInputComponent();
 	}
+
+	MainCharacter = Cast<AMain>(GetPawn());
 }
 
 // Called to bind functionality to input
 //void AMainController::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-void AMainController::SetupInputComponent()
-{
+void AMainController::SetupInputComponent() {
 	// Super::SetupPlayerInputComponent(PlayerInputComponent);
 	Super::SetupInputComponent();
 
-	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(InputComponent))
-	{
+	if (UEnhancedInputComponent* EnhancedInputComponent = CastChecked<UEnhancedInputComponent>(InputComponent)) {
 		// Game Pause 
 		EnhancedInputComponent->BindAction(PauseGameAction, ETriggerEvent::Started, this, &AMainController::PauseGame);
 
@@ -88,179 +84,117 @@ void AMainController::SetupInputComponent()
 	}
 }
 
-void AMainController::LookCTR(const FInputActionValue& Value)
-{
-	// Call the JumpAction function on the possessed character
-	AMain* MainCharacter = Cast<AMain>(GetPawn());
-	if (MainCharacter)
-	{
+void AMainController::LookCTR(const FInputActionValue& Value) {
+	if (IsValid(MainCharacter)) {
 		MainCharacter->Look(Value);
 	}
 }
 
-void AMainController::MoveCTR(const FInputActionValue& Value)
-{
-	// Call the JumpAction function on the possessed character
-	AMain* MainCharacter = Cast<AMain>(GetPawn());
-	if (MainCharacter)
-	{
+void AMainController::MoveCTR(const FInputActionValue& Value) {
+	if (IsValid(MainCharacter)) {
 		MainCharacter->Move(Value);
 	}
 }
 
-void AMainController::RunCTR()
-{
-	// Call the JumpAction function on the possessed character
-	AMain* MainCharacter = Cast<AMain>(GetPawn());
-	if (MainCharacter)
-	{
+void AMainController::RunCTR() {
+	if (IsValid(MainCharacter)) {
 		MainCharacter->Run();
 	}
 }
 
-void AMainController::RunEndCTR()
-{
-	// Call the JumpAction function on the possessed character
-	AMain* MainCharacter = Cast<AMain>(GetPawn());
-	if (MainCharacter)
-	{
+void AMainController::RunEndCTR() {
+	if (IsValid(MainCharacter)) {
 		MainCharacter->RunEnd();
 	}
 }
 
-void AMainController::JumpCTR()
-{
-	// Call the JumpAction function on the possessed character
+void AMainController::JumpCTR() {
 	JumpCounter = JumpCounter + 1;
-	if (JumpCounter % 2 != 0)
-	{
-		AMain* MainCharacter = Cast<AMain>(GetPawn());
-		if (MainCharacter)
-		{
-			MainCharacter->Jump();
-		}
-	}	
-}
-
-void AMainController::StopJumpingCTR()
-{
-	// Call the JumpAction function on the possessed character
-	StopJumpCounter = StopJumpCounter + 1;
-	if (StopJumpCounter % 2 != 0)
-	{
-		AMain* MainCharacter = Cast<AMain>(GetPawn());
-		if (MainCharacter)
-		{
-			MainCharacter->StopJumping();
+	if (AbleToJump) {
+		if (JumpCounter % 2 != 0) {
+			if (IsValid(MainCharacter)) {
+				MainCharacter->Jump();
+			}
 		}
 	}
-	
 }
 
-void AMainController::DashCTR()
-{
-	// Call the JumpAction function on the possessed character
+void AMainController::StopJumpingCTR() {
+	StopJumpCounter = StopJumpCounter + 1;
+	if (StopJumpCounter % 2 != 0) {
+		if (IsValid(MainCharacter)) {
+			MainCharacter->StopJumping();
+			AbleToJump = false;
+
+			GetWorldTimerManager().SetTimer(ResetJumpTimer, this,
+				&AMainController::ResetJump, JumpBreakTime, false);
+		}
+	}
+}
+
+void AMainController::ResetJump() {
+	AbleToJump = true;
+}
+
+void AMainController::DashCTR() {
 	DashCounter = DashCounter + 1;
-	if (DashCounter % 2 != 0)
-	{
-		AMain* MainCharacter = Cast<AMain>(GetPawn());
-		if (MainCharacter)
-		{
+	if (DashCounter % 2 != 0) {
+		if (IsValid(MainCharacter)) {
 			MainCharacter->Dash();
 		}
 	}
 }
 
-void AMainController::CrouchStartCTR()
-{
-	GEngine->AddOnScreenDebugMessage(-1, 0.3f, FColor::Yellow, TEXT("Control to Crouch"));
-
-	// Call the JumpAction function on the possessed character
-	AMain* MainCharacter = Cast<AMain>(GetPawn());
-	if (MainCharacter)
-	{
+void AMainController::CrouchStartCTR() {
+	if (IsValid(MainCharacter)) {
 		MainCharacter->CrouchStart();
 	}
 }
 
-void AMainController::CrouchEndCTR()
-{
-	// Call the JumpAction function on the possessed character
-	AMain* MainCharacter = Cast<AMain>(GetPawn());
-	if (MainCharacter)
-	{
+void AMainController::CrouchEndCTR() {
+	if (IsValid(MainCharacter)) {
 		MainCharacter->CrouchEnd();
 	}
 }
 
-void AMainController::SpendAllCalmCTR()
-{
-	// Call the JumpAction function on the possessed character
-	AMain* MainCharacter = Cast<AMain>(GetPawn());
-	if (MainCharacter)
-	{
+void AMainController::SpendAllCalmCTR() {
+	if (IsValid(MainCharacter)) {
 		MainCharacter->SpendAllCalm();
 	}
 }
 
-void AMainController::UsePassiveCTR()
-{
-	// Call the JumpAction function on the possessed character
-	AMain* MainCharacter = Cast<AMain>(GetPawn());
-	if (MainCharacter)
-	{
+void AMainController::UsePassiveCTR() {
+	if (IsValid(MainCharacter)) {
 		MainCharacter->UsePassive();
 	}
 }
 
-void AMainController::UseBasicAttackCTR()
-{
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("USING BASIC ATTACK"));
-	// Call the JumpAction function on the possessed character
-	AMain* MainCharacter = Cast<AMain>(GetPawn());
-	if (MainCharacter)
-	{
+void AMainController::UseBasicAttackCTR() {
+	if (IsValid(MainCharacter)) {
 		MainCharacter->UseBasicAttack();
 	}
 }
 
-void AMainController::UseAbilityOneCTR()
-{
-	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("USING ABILITY ONE"));
-	// Call the JumpAction function on the possessed character
-	AMain* MainCharacter = Cast<AMain>(GetPawn());
-	if (MainCharacter)
-	{
+void AMainController::UseAbilityOneCTR() {
+	if (IsValid(MainCharacter)) {
 		MainCharacter->UseAbilityOne();
 	}
 }
 
-void AMainController::UseAbilityTwoCTR()
-{
-	// Call the JumpAction function on the possessed character
-	AMain* MainCharacter = Cast<AMain>(GetPawn());
-	if (MainCharacter)
-	{
+void AMainController::UseAbilityTwoCTR() {
+	if (IsValid(MainCharacter)) {
 		MainCharacter->UseAbilityTwo();
 	}
 }
 
-void AMainController::UseAbilityThreeCTR()
-{
-	// Call the JumpAction function on the possessed character
-	AMain* MainCharacter = Cast<AMain>(GetPawn());
-	if (MainCharacter)
-	{
+void AMainController::UseAbilityThreeCTR() {
+	if (IsValid(MainCharacter)) {
 		MainCharacter->UseAbilityThree();
 	}
 }
 
-void AMainController::UseAbilityFourCTR()
-{
-	// Call the JumpAction function on the possessed character
-	AMain* MainCharacter = Cast<AMain>(GetPawn());
-	if (MainCharacter)
-	{
+void AMainController::UseAbilityFourCTR() {
+	if (IsValid(MainCharacter)) {
 		MainCharacter->UseAbilityFour();
 	}
 }

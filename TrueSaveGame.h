@@ -12,16 +12,16 @@
  * 
  */
 UCLASS()
-class TRUEPROJECT2_API UTrueSaveGame : public USaveGame
+class LIMITLESS_API UTrueSaveGame : public USaveGame
 {
 	GENERATED_BODY()
 
 	UTrueSaveGame();
-
+	
 protected:
 	// Language
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Language")
-		ELanguageSelected GameLanguageSaved = ELanguageSelected::EEnglish;
+		ELanguageSelected GameLanguageSaved = ELanguageSelected::English;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main AbilityCode")
 		EAbilityCode WeaponSaved = EAbilityCode::ENone;

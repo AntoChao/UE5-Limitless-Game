@@ -6,31 +6,104 @@
 #include "GameFramework/GameModeBase.h"
 #include "TrueGame2Instance.h"
 #include "Common_Enums.h"
+
+#include "Sound/SoundCue.h"
+#include "Components/AudioComponent.h"
+
 #include "TrueProject2GameModeBase.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API ATrueProject2GameModeBase : public AGameModeBase
+class LIMITLESS_API ATrueProject2GameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
 
 protected:
-	// Game necesary values
-	UFUNCTION(BlueprintCallable, Category = "GameState")
-		void InitializeAllVariables();
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Instance")
 		UTrueGame2Instance* GameInstance;
 
-	/*
-	GameMode start by reading GameInstance game state
-	which is left by the previous GAMEMODE
-	GameMode should finish by leaving the next game state and opening the correspond level
-	*/
-	UFUNCTION(BlueprintCallable, Category = "GameState")
+	// Games Endinig
+
+	// Ending Survive
+	// if player survive xx minutes -> run a 30 segs timer -> finish
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Over")
+		FTimerHandle ExploreTimerHandle;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Over")
+		float ExploreSeg = 30.0f; /*30 segs*/
+	UFUNCTION(BlueprintCallable, Category = "Game Over")
+		void FinishExploration();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Over")
+		int SurviveDay = 15; /*days*/
+	UFUNCTION(BlueprintCallable, Category = "Game Over")
+		void CheckSurvive();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Over")
+		bool isSurvived = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Over")
+		FTimerHandle SurvivedTimerHandle;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Over")
+		float ExitSeg = 30.0f; /*30 segs*/
+	UFUNCTION(BlueprintCallable, Category = "Game Over")
+		void Survived();
+
+	// Play Music
+	UFUNCTION(BlueprintCallable, Category = "BGM")
+		void PlayBGM();
+	
+	UFUNCTION(BlueprintCallable, Category = "BGM")
+		void PlayChillBGM();
+	UFUNCTION(BlueprintCallable, Category = "BGM")
+		void PlayCombatBGM();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BGM")
+		UAudioComponent* BGMComponent = nullptr;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BGM")
+		USoundCue* ChillBGMSoundCue;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "BGM")
+		USoundCue* CombatBGMSoundCue;
+
+	// Main Base
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main Base")
+		FVector MainBaseLocation = FVector(0.0f, 0.0f, 0.0f);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main Base")
+		FRotator MainBaseRotation = FRotator(0.0f, 0.0f, 0.0f);
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main Base")
+		TSubclassOf<class AMapCompMainBase> MainBaseClass;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main Base")
+		AMapCompMainBase* MainBase;
+
+	UFUNCTION(BlueprintCallable, Category = "Main Base")
+		void SpawnMainBase();
+
+	// Secret Portal
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Secret Portal")
+		FVector SecretPortalLocation = FVector(0.0f, 0.0f, 0.0f);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Secret Portal")
+		FRotator SecretPortalRotation = FRotator(0.0f, 0.0f, 0.0f);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Secret Portal")
+		TSubclassOf<class AMapCompSecretPortal> SecretPortalClass;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Secret Portal")
+		AMapCompSecretPortal* SecretPortal;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Secret Portal")
+		FTimerHandle SecretPortalTimerHandle;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Secret Portal")
+		float SecretPortalSpawnSegs = 60.0f;
+	UFUNCTION(BlueprintCallable, Category = "Secret Portal")
+		void SpawnSecretPortal();
+
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "Secret Portal")
+		void SecretPortalSpawnSound();
+
+	// Open Game State
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "GameState")
 		void OpenPreGameState();
-	UFUNCTION(BlueprintCallable, Category = "GameState")
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "GameState")
 		void OpenPlayingState();
-	UFUNCTION(BlueprintCallable, Category = "GameState")
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "GameState")
 		void OpenPostGameState();
 
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "Open Widget")
@@ -40,72 +113,47 @@ protected:
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "Open Widget")
 		void OpenPostGameWidget();
 
+	// Spawn Main Parameters
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn Main")
+		float MainHalfHeight = 200.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn Main")
+		FVector MainSpawnLocation = FVector(100.0f, 100.0f, 100.0f);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn Main")
+		FRotator MainSpawnRotation = FRotator(0.0f, 0.0f, 0.0f);
+
 	// Past PostGame Stats
 	UFUNCTION(BlueprintCallable, Category = "Game State")
 		void PastAllPostGameStats();
 
-	// Game Timer
-		// difficulty of the current stage, difficulty is update by timer and event
-		// Difficulty -> change the power, health and spawn frequency
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Difficulty")
-		float difficulty = 1.0f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Difficulty")
-		float difficultyModifier = 1.2f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Difficulty")
-		float HealthMofByDifficulty = 50.0f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Difficulty")
-		float PowerMofByDifficulty = 50.0f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn Enemies")
-		float EnemySpawnRate;
-
-	UFUNCTION(BlueprintCallable, Category = "Difficulty")
-		void UpdateDifficulty();
-	
-	UFUNCTION(BlueprintCallable, Category = "Difficulty")
-		void BuffAllEnemiesByDifficulty();
-	UFUNCTION(BlueprintCallable, Category = "Difficulty")
-		void BuffAEnemyByDifficulty(AEnemyClass* AEnemy);
-	UFUNCTION(BlueprintCallable, Category = "Difficulty")
-		void ResetAllEnemiesDifficultyBuff();
-	UFUNCTION(BlueprintCallable, Category = "Difficulty")
-		void ResetAEnemyDifficultyBuff(AEnemyClass* AEnemy);
-
-	// Modifiers for spwaning
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Difficulty")
-		float HealthModifierDifficulty;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Difficulty")
-		float PowerModifierDifficulty;
-
 	// Time/ day control
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Time State")
 		FTimerHandle RunTimerHandle;
-	/*Somehow I have to change this value to realistic -> I only have to change it to hours*/
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Time State")
-		int TotalGameTimeInSeconds; 
+		float CurrentSecond = 0.0f; 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Time State")
-		int CurrentDayTimeInSeconds = 0.0f;;
+		float CurrentMinute = 0.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Time State")
-		int daysCounter = 1.0f;
+		float CurrentHour = 6.0f;;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Time State")
+		float CurrentDay = 1.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Time State")
+		float SegRate = 2.4f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Time State")
+		float Seg2Minutes = 60.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Time State")
+		float Minutes2Hour = 60.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Time State")
+		float Hour2Day = 24.0f;
+
+	// Morning and night control
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Time State")
 		bool bIsInMorning = true; /*day or night*/
 
-	// Suppose day = 60 segs and night = 10segs
+	// Night -> 0 am to 4 am, rest is morning
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Time State")
-		int dayTotalDuration = 0.0f;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Time State")
-		int dayDuration = 20.0f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Time State")
-		int nightDuration = 4.0f;
-	
-	// For displaying purpose
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Time State")
-		int oneHourInGame = 0.0f; /*totalDayDuration / 24 */
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Time State")
-		int realWorldTime = 0.0f; /*mim 0, max = 23*/
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Time State")
-		float dayTimePercentage = 0.0f;
-
+		float nightStart = 4.0f;
 
 	// Time/ Day
 	UFUNCTION(BlueprintCallable, Category = "Buff/Debuff")
@@ -115,28 +163,41 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "Buff/Debuff")
 		void HandleTime();
 
-		// to display
-	UFUNCTION(BlueprintCallable, Category = "Time State")
-		bool RealWorldTimeChanged();
-	UFUNCTION(BlueprintCallable, Category = "Time State")
-		void RealWorldTimeConverter();
+	// Spawn Enemies Parameters
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn Enemies")
+		float minRadio = 3000.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn Enemies")
+		float maxRadio = 15000.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn Enemies")
+		float spawnRate = 7.5f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn Enemies")
+		float minSpawnRate = 1.0f;
 
+	// Modifiers for spwaning difficulty
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Difficulty")
+		float difficultyBuff = 1.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Difficulty")
+		float difficultyModifier = 1.25f;
 
-	// Buff/ Debuff enemies
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Buff/Debuff")
-		float HealthModifierByNight = 0.0f;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Buff/Debuff")
-		float PowerModifierByNight = 0.0f;
-	
+	UFUNCTION(BlueprintCallable, Category = "Difficulty")
+		void UpdateDifficulty();
+
+	UFUNCTION(BlueprintCallable, Category = "Difficulty")
+		void BuffAllEnemiesByDifficulty();
+
+	// Modifiers for spwaning day/ night
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Difficulty")
+		float nightBuff = 1.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Difficulty")
+		float nightBuffModifier = 1.25f;
+
+	UFUNCTION(BlueprintCallable, Category = "Difficulty")
+		void UpdateNightBuff();
+
 	UFUNCTION(BlueprintCallable, Category = "Buff/Debuff")
 		void BuffAllNightEnemies();
 	UFUNCTION(BlueprintCallable, Category = "Buff/Debuff")
-		void BuffANightEnemy(AEnemyClass* AEnemy);
-
-	UFUNCTION(BlueprintCallable, Category = "Buff/Debuff")
 		void DebuffAllDayEnemies();
-	UFUNCTION(BlueprintCallable, Category = "Buff/Debuff")
-		void DebuffADayEnemy(AEnemyClass* AEnemy);
 
 	// Player To Recognize
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main")
@@ -159,32 +220,35 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Main")
 		class UPlayerStatsUMG* PlayerHUD;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn Enemies")
-		TSubclassOf<class UPlayerStatsUMG> PlayerHUDClass;
+	// Objectives
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Over")
+		FText CurrentObjective = FText::FromString("");
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Over")
+		FText ObjExplore = FText::FromString("EXPLORE SURRONDING");
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Over")
+		FText ObjSurvive = FText::FromString("SURVIVE 15 DAYS");
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Over")
+		FText ObjPrepareExit = FText::FromString("WAIT 1 DAY FOR THE EXIT");
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Over")
+		FText ObjExit = FText::FromString("RETURN BASE TO EXIT");
 
 	// Enemies To Recognize
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn Enemies")
-		float SpawnOffset = 50.0f;
+		float SpawnHeightOffset = 120.0f;
+
 	// All Enemies
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn Enemies")
 		TArray<AEnemyClass*> EnemiesSpawned = {};
 	
-	/*
-	ENormal,
-	ESpecial,
-	EElite,
-	EBoss,
-	EGigaBoss,
-	EUnknown
-	*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn Enemies")
 		int enemyRarities = 5;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn Enemies")
-		int normalEnemy = 12;
+		int normalEnemy = 7;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn Enemies")
-		int specialEnemy = 7;
+		int specialEnemy = 6;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn Enemies")
-		int eliteEnemy = 3;
+		int eliteEnemy = 2;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn Enemies")
 		int bossEnemy = 1;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn Enemies")
@@ -258,7 +322,6 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemies")
 		TSubclassOf<class AEnemy26_Spider_Queen> EnemySpiderQueenClass;
 	
-	
 	UFUNCTION(BlueprintCallable, Category = "Enemies")
 		void RefreshEnemiesList();
 
@@ -271,14 +334,6 @@ protected:
 	// variables for timer to spawn, it depends on difficulty
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn Enemies")
 		FTimerHandle SpawnTimerHandle;
-
-	// radios to determinate the spawn
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn Enemies")
-		float minRadio;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn Enemies")
-		float maxRadio;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawn Enemies")
-		float DistOfRandom;
 
 	// Objectives -> 5 objectives, each one with a status and ftext
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Display Objective")
@@ -310,12 +365,27 @@ public:
 	ATrueProject2GameModeBase();
 
 	virtual void BeginPlay() override;
-	virtual void Tick(float DeltaTime) override;
+	// virtual void Tick(float DeltaTime) override;
 
 	// Game State
 	/**Handle any function calls that rely upon changing the playing state of our game */
+	
 	UFUNCTION(BlueprintCallable, Category = "Game State")
 		void HandleGameState();
+	UFUNCTION(BlueprintCallable, Category = "Game State")
+		void SetGameOver(EGameOverReason NewReason);
+
+	// Time
+	UFUNCTION(BlueprintCallable, Category = "Game Time")
+		bool GetIsMorning();
+	UFUNCTION(BlueprintCallable, Category = "Game Time")
+		float GetCurrentSecond();
+	UFUNCTION(BlueprintCallable, Category = "Game Time")
+		float GetCurrentMinute();
+	UFUNCTION(BlueprintCallable, Category = "Game Time")
+		float GetCurrentHour();
+	UFUNCTION(BlueprintCallable, Category = "Game Time")
+		float GetCurrentDay();
 
 	// Main Stats
 	UFUNCTION(BlueprintCallable, Category = "Main")
@@ -323,13 +393,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Main")
 		void GetMainRotation();
 	
-	// Spawn parameters
-	UFUNCTION(BlueprintCallable, Category = "Spawn Enemies")
-		void SetMinRadio(float radioValue);
-	UFUNCTION(BlueprintCallable, Category = "Spawn Enemies")
-		void SetMaxRadio(float radioValue);
-	UFUNCTION(BlueprintCallable, Category = "Spawn Enemies")
-		void SetSpawnRate(float newSpawnRate);
+	// Spawn Enemies Parameters
 	UFUNCTION(BlueprintCallable, Category = "Spawn Enemies")
 		void SpawnEnemiesRandomly();
 	UFUNCTION(BlueprintCallable, Category = "Spawn Enemies")
@@ -339,13 +403,6 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Spawn Enemies")
 		void SpawnEnemy();
 
-	// Time
-	UFUNCTION(BlueprintCallable, Category = "Time Stats")
-		float GiveTimePercentage();
-
-	UFUNCTION(BlueprintCallable, Category = "Time Stats")
-		FText GiveRealWorldTime();
-	
 protected:
 	// InitGame Widget
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Display English")

@@ -13,7 +13,7 @@
 */
 
 UCLASS()
-class TRUEPROJECT2_API AMiniWorld : public AActor
+class LIMITLESS_API AMiniWorld : public AActor
 {
 	GENERATED_BODY()
 
@@ -23,17 +23,19 @@ public:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 	
-	
 	//SO, THERE IS THE CORRECT FORM TO DO IT -> CREATE 4 LIST PER RARITY AND FOR LOOP...
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Chance")
+		int spawnChance = 70;
+
 	// amount of artifacts per type
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemies Amount")
 		int normal = 14;
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemies Amount")
 		int special = 16;
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemies Amount")
 		int rare = 9;
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemies Amount")
 		int op = 1;
 
 	// no instances -> just object class

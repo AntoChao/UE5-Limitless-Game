@@ -8,7 +8,7 @@
 #include "GameModeTest.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AGameModeTest : public AGameModeBase
+class LIMITLESS_API AGameModeTest : public AGameModeBase
 {
 	GENERATED_BODY()
 

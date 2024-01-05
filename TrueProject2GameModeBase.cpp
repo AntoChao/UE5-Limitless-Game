@@ -8,9 +8,12 @@
 #include "UObject/ConstructorHelpers.h"
 #include "Math/Vector.h"
 #include "NavigationSystem.h"
+#include "Math/UnrealMathUtility.h"
 #include "TimerManager.h"
 
 #include "Main.h"
+#include "map/MapCompMainBase.h"
+#include "map/MapCompSecretPortal.h"
 
 // Enemies
 #include "All_Enemies/EnemyClass.h"
@@ -39,425 +42,419 @@
 #include "All_Enemies/Enemy30_AttackDrone.h"
 #include "All_Enemies/Enemy31_KillerRabbit.h"
 
-ATrueProject2GameModeBase::ATrueProject2GameModeBase()
-{
-    PrimaryActorTick.bCanEverTick = true;
+ATrueProject2GameModeBase::ATrueProject2GameModeBase() {
+    // PrimaryActorTick.bCanEverTick = true;
 }
 
-void ATrueProject2GameModeBase::BeginPlay()
-{
+void ATrueProject2GameModeBase::BeginPlay() {
     Super::BeginPlay();
-
-    InitializeAllVariables();
 
     // Game GameInstance
     GameInstance = Cast<UTrueGame2Instance>(UGameplayStatics::GetGameInstance(this));
     
     MainIsSpawned = false;
-
-    // Spawn control
-    SetMinRadio(500.0f);
-    SetMaxRadio(15000.0f);
-    SetSpawnRate(10.0f);
-
+    /*
+    MainBaseRotation = FRotator(0, FMath::RandRange(0.0f, 360.0f), 0);
+    SecretPortalRotation = MainBaseRotation;
+    */
     // Process GameState
     HandleGameState();
-}
 
-// Called every frame
-void ATrueProject2GameModeBase::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);    
-
-    // GameMode is responsable to check if the main is dead or not, if dead -> quit by opening a new level
-    if (MainIsSpawned)
-    {
-        if (IsValid(MainCharacter))
-        {
-            if (MainCharacter->GetCharacterHealth() <= 0.0f)
-            {
-                if (GameInstance)
-                {
-                    GameInstance->SetCurrentState(EGamePlayState::EGameOver);
-                    HandleGameState();
-                }
-            }
-        }
-        else
-        {
-            if (GameInstance)
-            {
-                GameInstance->SetCurrentState(EGamePlayState::EGameOver);
-                HandleGameState();
-                // OpenPostGameState();
-            }
-        }
+    if (GameInstance->GetCurrentState() == EGamePlayState::EPlaying) {
+        // Time control
+        TimeRunning();
     }
-}
 
-void ATrueProject2GameModeBase::HandleGameState()
-{
-    if (GameInstance)
-    {
-        if (GameInstance->GetJustOpen())
-        {
-            OpenInitMenuWidget();
-            GameInstance->SetJustOpen(false);
-            
-        }
-        else
-        {
-            //Add the if logic of checking the first time opended
-            switch (GameInstance->GetCurrentState())
-            {
-            case EGamePlayState::EPreparing:
-            {
-                // Open Init Menu Widget
-                OpenPreGameWidget();
-                break;
-            }
-            case EGamePlayState::EPlaying:
-            {
-                // Reset all values
+    if (MainIsSpawned) {
+        CurrentObjective = ObjExplore;
 
-                // Spawn Main
-                SpawnMain();
-
-                // Time control
-                TimeRunning();
-
-                // Spawn Enemies overtime
-                SpawnEnemiesRandomly();
-                break;
-
-            }
-            case EGamePlayState::EGameOver:
-            {
-                // Load all necesaries ststs in game instance
-                PastAllPostGameStats();
-
-                // Open Post Game Analisis Widget
-                OpenPostGameWidget();
-                break;
-            }
-            default:
-            {
-                break;
-            }
-            }
-        }
+        GetWorldTimerManager().SetTimer(ExploreTimerHandle, this,
+            &ATrueProject2GameModeBase::FinishExploration, ExploreSeg, false);
     }
-}
 
-// In reality, there is not need to re initialized all variables
-// as the only time these variables are needed is when the gamemode is in playing
-void ATrueProject2GameModeBase::InitializeAllVariables()
-{
-    TotalGameTimeInSeconds = 0.0f;
-    CurrentDayTimeInSeconds = 0.0f;
-    dayTotalDuration = dayDuration + nightDuration;
-    oneHourInGame = dayTotalDuration / 24.0f;
-}
-
-/* Game State
-Each time a new level open -> the game mode override -> call GetGameMode() in order to
-process what is going to do
-*/
-void ATrueProject2GameModeBase::OpenPreGameState()
-{
-    if (GameInstance)
-    {
-        // GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, TEXT("Open PreGameState"));
-        GameInstance->SetCurrentState(EGamePlayState::EPreparing);
-        UGameplayStatics::OpenLevel(this, FName("TruePreGameLevel"));
-    }
-}
-void ATrueProject2GameModeBase::OpenPlayingState()
-{
-    if (GameInstance)
-    {
-        // GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, TEXT("Open InGameState"));
-        GameInstance->SetCurrentState(EGamePlayState::EPlaying);
-        UGameplayStatics::OpenLevel(this, FName("TrueTheGameLevel"));
-    }
-}
-void ATrueProject2GameModeBase::OpenPostGameState()
-{
-    if (GameInstance)
-    {
-        // Open the level
-        // GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, TEXT("Open PostGameState"));
-        GameInstance->SetCurrentState(EGamePlayState::EGameOver);
-        UGameplayStatics::OpenLevel(this, FName("TruePostGameLevel"));
-    }
-}
-
-void ATrueProject2GameModeBase::PastAllPostGameStats()
-{
-    // Total Time
-    GameInstance->SetTotalInGameSegs(TotalGameTimeInSeconds);
-    
-    // Main Stats
-    MainCharacter->SetStatsToGameInstance();
+    PlayBGM();
 }
 
 // Time Control
-void ATrueProject2GameModeBase::TimeRunning()
-{
-    CurrentDayTimeInSeconds += 1;
-    dayTimePercentage = CurrentDayTimeInSeconds / dayTotalDuration;
+void ATrueProject2GameModeBase::TimeRunning() {
 
-    CheckTime();
+    CurrentSecond += SegRate;
+
+    if (CurrentSecond >= Seg2Minutes) {
+        int minutesExceed = CurrentSecond / Seg2Minutes;
+        CurrentSecond = CurrentSecond - Seg2Minutes * minutesExceed;
+        CurrentMinute += minutesExceed;
+
+        if (CurrentMinute >= Minutes2Hour) {
+            int hourExceed = CurrentMinute / Minutes2Hour;
+            CurrentMinute = CurrentMinute - (Minutes2Hour * hourExceed);
+            CurrentHour += hourExceed;
+
+            CheckTime();
+
+            if (CurrentHour >= Hour2Day) {
+                int dayExceed = CurrentHour / Hour2Day;
+                CurrentHour = CurrentHour - (Hour2Day * dayExceed);
+                CurrentDay += dayExceed;
+                
+                if (!isSurvived) {
+                    CheckSurvive();
+                }    
+            }
+        }
+    }
 
     // run the world timer
     GetWorldTimerManager().SetTimer(RunTimerHandle, this,
         &ATrueProject2GameModeBase::TimeRunning, 1.0f, false);
 }
 
-// Check Time 
-void ATrueProject2GameModeBase::CheckTime()
-{
-    // Manage day/ night circle
-    if (CurrentDayTimeInSeconds == dayDuration)
-    {
-        // GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, TEXT("Morning finish"));
-        // morning finish -> start the night
-        bIsInMorning = false;
-        HandleTime();
+void ATrueProject2GameModeBase::SetGameOver(EGameOverReason NewReason) {
 
-    }
-    else if (CurrentDayTimeInSeconds == dayDuration + nightDuration)
-    {
-        // GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, TEXT("Night finish"));
-        // night finish -> start a new day
-        bIsInMorning = true;
-        HandleTime();
-    }
+    PastAllPostGameStats();
 
-    // Manage real world time to display
-    if (RealWorldTimeChanged())
-    {
-        RealWorldTimeConverter();
-        GiveRealWorldTime();
+    if (IsValid(GameInstance)) {
+        GameInstance->SetGameOverReason(NewReason);
+        GameInstance->SetCurrentState(EGamePlayState::EGameOver);
+        OpenPostGameState();
     }
-
 }
 
-void ATrueProject2GameModeBase::HandleTime()
-{
-    if (bIsInMorning)
-    {
+// Ending: Survived
+void ATrueProject2GameModeBase::FinishExploration() {
+    CurrentObjective = ObjSurvive;
+}
+
+void ATrueProject2GameModeBase::CheckSurvive() {
+    // maybe more complicate
+    if (CurrentDay >= SurviveDay) {
+        
+        isSurvived = true;
+
+        // update the objective
+        CurrentObjective = ObjPrepareExit;
+
+        GetWorldTimerManager().SetTimer(SurvivedTimerHandle, this,
+            &ATrueProject2GameModeBase::Survived, ExitSeg, false);
+    }
+}
+
+void ATrueProject2GameModeBase::Survived() {
+    // activate the base and update the objective
+    CurrentObjective = ObjExit;
+
+    if (IsValid(MainBase)) {
+        MainBase->SetIfIsActivated(true);
+    }
+    
+    GetWorldTimerManager().SetTimer(SecretPortalTimerHandle, this,
+        &ATrueProject2GameModeBase::SpawnSecretPortal, SecretPortalSpawnSegs, false);
+}
+
+void ATrueProject2GameModeBase::HandleGameState() {
+    if (IsValid(GameInstance)) {
+        if (GameInstance->GetCurrentState() == 
+            EGamePlayState::EPlaying) {
+            // Reset all values
+
+            // Spawn Main
+            if (!MainIsSpawned) {
+                SpawnMainBase();
+                SpawnMain();
+            }
+            
+            // Spawn Enemies overtime
+            SpawnEnemiesRandomly();
+
+        }
+    }
+}
+
+/* Game State
+Each time a new level open -> the game mode override -> call GetGameMode() in order to
+process what is going to do
+*/
+/*
+void ATrueProject2GameModeBase::OpenPreGameState() {
+    if (IsValid(GameInstance)) {
+        GameInstance->SetCurrentState(EGamePlayState::EPreparing);
+        UGameplayStatics::OpenLevel(this, FName("TruePreGameLevel"));
+    }
+}
+void ATrueProject2GameModeBase::OpenPlayingState() {
+    if (IsValid(GameInstance)) {
+        GameInstance->SetCurrentState(EGamePlayState::EPlaying);
+        UGameplayStatics::OpenLevel(this, FName("TrueTheGameLevel"));
+    }
+}
+void ATrueProject2GameModeBase::OpenPostGameState() {
+    if (IsValid(GameInstance)) {
+        // Open the level
+        GameInstance->SetCurrentState(EGamePlayState::EGameOver);
+        UGameplayStatics::OpenLevel(this, FName("TruePostGameLevel"));
+    }
+}*/
+
+void ATrueProject2GameModeBase::PastAllPostGameStats() {
+    // Total Time
+    if (IsValid(GameInstance)) {
+        GameInstance->SetTotalInGameDays(FMath::RoundToInt(CurrentDay));
+        
+        // in case the ending is activated without main dying
+        if (IsValid(MainCharacter)) { 
+            GameInstance->SetTotalDamageDealed(MainCharacter->GetTotalDamageDealed());
+            GameInstance->SetTotalEnemiesKilled(MainCharacter->GetTotalEnemiesKilled());
+            GameInstance->SetTotalXPLeanrt(MainCharacter->GetTotalXP());
+            GameInstance->SetTotalDamageTaken(MainCharacter->GetTotalDamageTaken());
+            GameInstance->SetTotalItemsCollected(MainCharacter->GetAmountArtifact());
+        }
+    }
+}
+
+// Check Time 
+void ATrueProject2GameModeBase::CheckTime() {
+    
+    // Manage day/ night circle
+    if (CurrentHour < nightStart) {
+        bIsInMorning = false;
+    }
+    else {
+        bIsInMorning = true;
+    }
+
+    HandleTime();
+}
+
+void ATrueProject2GameModeBase::HandleTime() {
+    if (bIsInMorning) {
         // Refresh enemies list
         RefreshEnemiesList();
 
         // when night finish -> the day and difficulty also change
-        // Reset the difficulty of current enemies
         UpdateDifficulty();
 
         // Debuff all enemies spawned
         DebuffAllDayEnemies();
-        
-        // Day variables update
-        daysCounter += 1;
-        TotalGameTimeInSeconds += CurrentDayTimeInSeconds;
-        CurrentDayTimeInSeconds = 0.0f;
-        realWorldTime = 0.0f;
-        dayTimePercentage = 0.0f;
-
+        UpdateNightBuff();
     }
-    else
-    {
+    else {
         // Buff to all enemies spawned -> detection, speed, damage, health
-        // logic of buff enemies that will spawned is part of spawn enemies
         BuffAllNightEnemies();
     }
 }
 
+void ATrueProject2GameModeBase::PlayBGM() {
+    if (IsValid(GameInstance)) {
+        if (GameInstance->GetCurrentState() ==
+            EGamePlayState::EPlaying) {
+
+            if (CurrentDay > SurviveDay / 2) {
+                PlayCombatBGM();
+            }
+            else {
+                PlayChillBGM();
+            }
+        }
+        else {
+            PlayChillBGM();
+        }
+    }
+}
+
+void ATrueProject2GameModeBase::PlayChillBGM() {
+    if (IsValid(ChillBGMSoundCue)) {
+        BGMComponent = UGameplayStatics::SpawnSound2D(GetWorld(),
+            ChillBGMSoundCue);
+
+        if (IsValid(BGMComponent)) {
+            BGMComponent->OnAudioFinished.AddUniqueDynamic(this, &ATrueProject2GameModeBase::PlayBGM);
+        }
+    }
+}
+
+void ATrueProject2GameModeBase::PlayCombatBGM() {
+    if (IsValid(CombatBGMSoundCue)) {
+        BGMComponent = UGameplayStatics::SpawnSound2D(GetWorld(),
+            CombatBGMSoundCue);
+
+        if (IsValid(BGMComponent)) {
+            BGMComponent->OnAudioFinished.AddUniqueDynamic(this, &ATrueProject2GameModeBase::PlayBGM);
+        }
+    }
+}
+
 // FOR NOW -> It does not reset the difficulties of already spawned enemies
-void ATrueProject2GameModeBase::BuffAllEnemiesByDifficulty()
-{
-    for (AEnemyClass* EnemyDelta : EnemiesSpawned)
-    {
-        if (IsValid(EnemyDelta))
-        {
-            BuffAEnemyByDifficulty(EnemyDelta);
-        }
-    }
-}
-void ATrueProject2GameModeBase::BuffAEnemyByDifficulty(AEnemyClass* AEnemy)
-{
-    if (IsValid(AEnemy))
-    {
-        // Buff to all enemies spawned -> detection, speed, damage, health
-        AEnemy->UpdateHealthPoint(HealthMofByDifficulty);
-        AEnemy->UpdateCharacterPowerUp(PowerMofByDifficulty);
-    }
-}
-void ATrueProject2GameModeBase::ResetAllEnemiesDifficultyBuff()
-{
-    for (AEnemyClass* EnemyDelta : EnemiesSpawned)
-    {
-        if (IsValid(EnemyDelta))
-        {
-            ResetAEnemyDifficultyBuff(EnemyDelta);
-        }
-    }
-}
-void ATrueProject2GameModeBase::ResetAEnemyDifficultyBuff(AEnemyClass* AEnemy)
-{
-    if (IsValid(AEnemy))
-    {
-        // Buff to all enemies spawned -> detection, speed, damage, health
-        AEnemy->UpdateHealthPoint(-HealthMofByDifficulty);
-        AEnemy->UpdateCharacterPowerUp(-PowerMofByDifficulty);
-    }
-}
-
-void ATrueProject2GameModeBase::BuffAllNightEnemies()
-{
-    for (AEnemyClass* EnemyDelta : EnemiesSpawned)
-    {
-        if (IsValid(EnemyDelta))
-        {
-            BuffANightEnemy(EnemyDelta);
-        }
-    }
-}
-void ATrueProject2GameModeBase::BuffANightEnemy(AEnemyClass* AEnemy)
-{
-    if (!bIsInMorning)
-    {
-        if (IsValid(AEnemy))
-        {
-            // Buff to all enemies spawned -> detection, speed, damage, health
-            AEnemy->UpdateHealthPoint(HealthModifierByNight);
-            AEnemy->UpdateCharacterPowerUp(PowerModifierByNight);
-        }  
-    }
-}
-void ATrueProject2GameModeBase::DebuffAllDayEnemies()
-{
-    for (AEnemyClass* EnemyDelta : EnemiesSpawned)
-    {
-        if (IsValid(EnemyDelta))
-        {
-            DebuffADayEnemy(EnemyDelta);
-        }
-    }
-}
-void ATrueProject2GameModeBase::DebuffADayEnemy(AEnemyClass* AEnemy)
-{
-    if (bIsInMorning)
-    {
-        if (IsValid(AEnemy))
-        {
-            // Debuff to all enemies spawned -> detection, speed, damage, health
-            AEnemy->UpdateHealthPoint(-HealthModifierByNight);
-            AEnemy->UpdateCharacterPowerUp(-PowerModifierByNight);
+void ATrueProject2GameModeBase::BuffAllEnemiesByDifficulty() {
+    for (AEnemyClass* EnemyDelta : EnemiesSpawned) {
+        if (IsValid(EnemyDelta)) {
+            EnemyDelta->GetDifficultBuff(difficultyBuff);
         }
     }
 }
 
-void ATrueProject2GameModeBase::UpdateDifficulty()
-{
-    difficulty = difficulty * difficultyModifier;
+void ATrueProject2GameModeBase::UpdateDifficulty() {
+    difficultyBuff = difficultyBuff * difficultyModifier;
+    if (spawnRate > minSpawnRate) {
+        spawnRate = spawnRate * (1 / difficultyBuff);
+    }
+}
 
-    HealthMofByDifficulty = HealthMofByDifficulty * difficulty;
-    PowerMofByDifficulty = PowerMofByDifficulty * difficulty;
-    EnemySpawnRate = EnemySpawnRate * (1 / difficulty);
+void ATrueProject2GameModeBase::BuffAllNightEnemies() {
+    for (AEnemyClass* EnemyDelta : EnemiesSpawned) {
+        if (IsValid(EnemyDelta)) {
+            EnemyDelta->GetNightBuff(nightBuff);
+        }
+    }
+}
+
+void ATrueProject2GameModeBase::DebuffAllDayEnemies() {
+    for (AEnemyClass* EnemyDelta : EnemiesSpawned) {
+        if (IsValid(EnemyDelta)) {
+            EnemyDelta->GetMorningDebuff(1 / nightBuff);
+        }
+    }
+}
+
+void ATrueProject2GameModeBase::UpdateNightBuff() {
+    nightBuff = nightBuff * nightBuffModifier;
+}
+
+void ATrueProject2GameModeBase::RefreshEnemiesList() {
+    TArray<AEnemyClass*> DeltaValidEnemies = {};
+    for (AEnemyClass* EnemyDelta : EnemiesSpawned) {
+        if (IsValid(EnemyDelta)) {
+            DeltaValidEnemies.Add(EnemyDelta);
+        }
+    }
+    EnemiesSpawned = DeltaValidEnemies;
 }
 
 // Main Stats
-void ATrueProject2GameModeBase::SpawnMain()
-{
+void ATrueProject2GameModeBase::SpawnMain() {
     // ***** Need to add logic about where spawn player and not just restart it
     FActorSpawnParameters ActorSpawnParams;
     ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-    //MainHalfHeight = MainCharacter->GetMainHalfHeight();
-    float MainHalfHeight = 200.0f;
-    FVector PlaceToSpawnMain = FVector(100.0f, 100.0f, 100.0f) + FVector(0.0f, 0.0f, MainHalfHeight);
 
-    MainCharacter = GetWorld()->SpawnActor<AMain>(MainClass, PlaceToSpawnMain, FRotator(0.0f, 0.0f, 0.0f), ActorSpawnParams);
-
-    APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
-
-    if (PlayerController && MainCharacter)
-    {
-        PlayerController->Possess(MainCharacter);
-        MainIsSpawned = true;
-        MainCharacter->InitializeMainController();
-        // GEngine->AddOnScreenDebugMessage(-1, 10.0f, FColor::Yellow, TEXT("Spawn and Possesed Main"));
+    if (IsValid(MainBase)) {
+        MainSpawnLocation = MainBaseLocation + MainBase->GetSpawnMainOffSet() + FVector(0.0f, 0.0f, MainHalfHeight);
     }
 
-    PlayerHUD = MainCharacter->GetPlayerUIWidget();
+    if (IsValid(MainClass)) {
+        MainCharacter = GetWorld()->SpawnActor<AMain>(MainClass, MainSpawnLocation,
+            MainSpawnRotation, ActorSpawnParams);
+
+        APlayerController* PlayerController = UGameplayStatics::GetPlayerController(GetWorld(), 0);
+
+        if (IsValid(PlayerController) && IsValid(MainCharacter)) {
+            PlayerController->Possess(MainCharacter);
+            MainIsSpawned = true;
+            MainCharacter->InitializeMainController();
+        }
+    }   
 }
 
-void ATrueProject2GameModeBase::GetMainLocation()
-{
-    if (IsValid(MainCharacter))
-    {
+void ATrueProject2GameModeBase::SpawnMainBase() {
+    FActorSpawnParameters ActorSpawnParams;
+    ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+    if (IsValid(MainBaseClass)) {
+        MainBase = GetWorld()->SpawnActor<AMapCompMainBase>(MainBaseClass, MainBaseLocation,
+            MainBaseRotation, ActorSpawnParams);
+    }
+}
+
+void ATrueProject2GameModeBase::SpawnSecretPortal() {
+    FActorSpawnParameters ActorSpawnParams;
+    ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+    
+    GenerateRandomLocation();
+    SecretPortalLocation = RandomLocationToSpawn;
+
+    if (IsValid(SecretPortalClass)) {
+        SecretPortal = GetWorld()->SpawnActor<AMapCompSecretPortal>(SecretPortalClass, SecretPortalLocation,
+            SecretPortalRotation, ActorSpawnParams);
+
+        if (IsValid(SecretPortal)) {
+            SecretPortalSpawnSound();
+            SecretPortal->SetIfIsActivated(true);
+        }
+    }
+}
+
+void ATrueProject2GameModeBase::GetMainLocation() {
+    if (IsValid(MainCharacter)) {
         PlayerLocation = MainCharacter->GetPlayerPosition();
     }
 }
-void ATrueProject2GameModeBase::GetMainRotation()
-{
-    if (IsValid(MainCharacter))
-    {
+void ATrueProject2GameModeBase::GetMainRotation() {
+    if (IsValid(MainCharacter)) {
         PlayerRotation = MainCharacter->GetPlayerRotation();
     }
 }
 
+bool ATrueProject2GameModeBase::GetIsMorning() {
+    return bIsInMorning;
+}
+float ATrueProject2GameModeBase::GetCurrentSecond() {
+    return CurrentSecond;
+}
+float ATrueProject2GameModeBase::GetCurrentMinute() {
+    return CurrentMinute;
+}
+float ATrueProject2GameModeBase::GetCurrentHour() {
+    return CurrentHour;
+}
+float ATrueProject2GameModeBase::GetCurrentDay() {
+    return CurrentDay;
+}
+
 // Spawn Enemies
-void ATrueProject2GameModeBase::SpawnEnemiesRandomly()
-{
+void ATrueProject2GameModeBase::SpawnEnemiesRandomly() {
     GetMainLocation();
     GetMainRotation();
 
     GenerateRandomLocation();
-    if (CheckRandomLocationValid())
-    {
+    if (CheckRandomLocationValid()) {
         SpawnEnemy();
     }
 
-    GetWorldTimerManager().SetTimer(SpawnTimerHandle, this, &ATrueProject2GameModeBase::SpawnEnemiesRandomly, EnemySpawnRate, false);
+    GetWorldTimerManager().SetTimer(SpawnTimerHandle, this, 
+        &ATrueProject2GameModeBase::SpawnEnemiesRandomly, spawnRate, false);
 }
 
-void ATrueProject2GameModeBase::GenerateRandomLocation()
-{
+void ATrueProject2GameModeBase::GenerateRandomLocation() {
     NavArea = FNavigationSystem::
         GetCurrent<UNavigationSystemV1>(UGameplayStatics::GetPlayerPawn(GetWorld(), 0));
 
-    if (NavArea)
-    {
+    if (NavArea) {
         NavArea->K2_GetRandomReachablePointInRadius(GetWorld(),
             PlayerLocation, RandomLocationToSpawn, maxRadio);
     }
 
-    RandomLocationToSpawn = RandomLocationToSpawn + FVector(0.0f, 0.0f, SpawnOffset);
-
+    RandomLocationToSpawn = RandomLocationToSpawn + FVector(0.0f, 0.0f, SpawnHeightOffset);
 }
 
-bool ATrueProject2GameModeBase::CheckRandomLocationValid()
-{
-    DistOfRandom = (PlayerLocation - RandomLocationToSpawn).Size();
+bool ATrueProject2GameModeBase::CheckRandomLocationValid() {
+    float DistOfRandom = (PlayerLocation - RandomLocationToSpawn).Size();
 
     return minRadio <= DistOfRandom;
 }
 
-void ATrueProject2GameModeBase::SpawnEnemy()
-{
+void ATrueProject2GameModeBase::SpawnEnemy() {
     // Change the rotation -> should be spawnLocation - ActorLocation
     // have to spawn based on rarity just like miniworld
     AEnemyClass* aRandomEnemy = GetRandomEnemy();
 
     // When a enemy spawn -> update its stats by difficulty and night if it is night
-    EnemiesSpawned.Add(aRandomEnemy);
-    
-    BuffAEnemyByDifficulty(aRandomEnemy);
-    if (!bIsInMorning)
-    {
-        BuffANightEnemy(aRandomEnemy);
+    if (IsValid(aRandomEnemy)) {
+        EnemiesSpawned.Add(aRandomEnemy);
+
+        aRandomEnemy->GetDifficultBuff(difficultyBuff);
+
+        if (!bIsInMorning) {
+            aRandomEnemy->GetNightBuff(nightBuff);
+        }
     }
 }
 
@@ -488,7 +485,7 @@ AEnemyClass* ATrueProject2GameModeBase::GetRandomEnemy() {
             theRandomEnemy = GenerateNormalEnemy();
             break;
         }
-                }
+    }
 
     return theRandomEnemy;
 }
@@ -503,10 +500,10 @@ EEnemyRarity ATrueProject2GameModeBase::GenerateRandomEnemyRarity() {
     * 1% -> boss enemy
     * 0% -> giga boss enemy
     */
-    if (Chance < 60) {
+    if (Chance < 50) {
         return EEnemyRarity::ENormal;
     }
-    else if (Chance < 90) {
+    else if (Chance < 75) {
         return EEnemyRarity::ESpecial;
     }
     else if (Chance < 90) {
@@ -571,140 +568,119 @@ AEnemyClass* ATrueProject2GameModeBase::GenerateNormalEnemy() {
             break;
         }
         case 3: {
-            if (IsValid(EnemyParasiteRookieClass)) {
-                return GetWorld()->SpawnActor<AEnemy3_Parasite_Rookie>(EnemyParasiteRookieClass, RandomLocationToSpawn, FRotator(0.0f, 0.0f, 0.0f), ActorSpawnParams);
-            }
-            break;
-        }
-        case 4: {
-            if (IsValid(EnemyHumanBladeClass)) {
-                return GetWorld()->SpawnActor<AEnemy5_Human_Blade>(EnemyHumanBladeClass, RandomLocationToSpawn, FRotator(0.0f, 0.0f, 0.0f), ActorSpawnParams);
-            }
-            break;
-        }
-        case 5: {
-            if (IsValid(EnemyHumanPistolClass)) {
-                return GetWorld()->SpawnActor<AEnemy6_Human_Pistol>(EnemyHumanPistolClass, RandomLocationToSpawn, FRotator(0.0f, 0.0f, 0.0f), ActorSpawnParams);
-            }
-            break;
-        }
-        case 6: {
-            if (IsValid(EnemyHumanShotgunClass)) {
-                return GetWorld()->SpawnActor<AEnemy7_Human_Shotgun>(EnemyHumanShotgunClass, RandomLocationToSpawn, FRotator(0.0f, 0.0f, 0.0f), ActorSpawnParams);
-            }
-            break;
-        }
-        case 7: {
-            if (IsValid(EnemyBoarClass)) {
-                return GetWorld()->SpawnActor<AEnemy8_Boar>(EnemyBoarClass, RandomLocationToSpawn, FRotator(0.0f, 0.0f, 0.0f), ActorSpawnParams);
-            }
-            break;
-        }
-        case 8: {
             if (IsValid(EnemyZombieClass)) {
                 return GetWorld()->SpawnActor<AEnemy13_Zombie>(EnemyZombieClass, RandomLocationToSpawn, FRotator(0.0f, 0.0f, 0.0f), ActorSpawnParams);
             }
             break;
         }
-        case 9: {
+        case 4: {
             if (IsValid(EnemyCultistClass)) {
                 return GetWorld()->SpawnActor<AEnemy22_Cultist>(EnemyCultistClass, RandomLocationToSpawn, FRotator(0.0f, 0.0f, 0.0f), ActorSpawnParams);
             }
             break;
         }
-        case 10: {
+        case 5: {
             if (IsValid(EnemySandBoxClass)) {
                 return GetWorld()->SpawnActor<AEnemy25_Sandworn>(EnemySandBoxClass, RandomLocationToSpawn, FRotator(0.0f, 0.0f, 0.0f), ActorSpawnParams);
             }
             break;
         }
-        case 11: {
+        case 6: {
             if (IsValid(EnemyWaspClass)) {
                 return GetWorld()->SpawnActor<AEnemy28_Wasp>(EnemyWaspClass, RandomLocationToSpawn, FRotator(0.0f, 0.0f, 0.0f), ActorSpawnParams);
             }
             break;
         }
-        case 12: {
+        case 7: {
             if (IsValid(EnemyDroneClass)) {
                 return GetWorld()->SpawnActor<AEnemy30_AttackDrone>(EnemyDroneClass, RandomLocationToSpawn, FRotator(0.0f, 0.0f, 0.0f), ActorSpawnParams);
             }
             break;
-        }/*
-        default: {
-            return GetWorld()->SpawnActor<AEnemy1_Bird>(EnemyBirdClass, RandomLocationToSpawn, FRotator(0.0f, 0.0f, 0.0f), ActorSpawnParams);
-            break;
-        }*/
+        }
     }
     return GetWorld()->SpawnActor<AEnemy1_Bird>(EnemyBirdClass, RandomLocationToSpawn, FRotator(0.0f, 0.0f, 0.0f), ActorSpawnParams);
 }
 
 AEnemyClass* ATrueProject2GameModeBase::GenerateSpecialEnemy() {
+    int chosenNumber = FMath::RandRange(1, specialEnemy);
+
     FActorSpawnParameters ActorSpawnParams;
     ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-    return GetWorld()->SpawnActor<AEnemy1_Bird>(EnemyBirdClass, RandomLocationToSpawn, FRotator(0.0f, 0.0f, 0.0f), ActorSpawnParams);
+    switch (chosenNumber) {
+        case 1: {
+            if (IsValid(EnemyRobotGirlClass)) {
+                return GetWorld()->SpawnActor<AEnemy9_Robot_Girl>(EnemyRobotGirlClass, RandomLocationToSpawn, FRotator(0.0f, 0.0f, 0.0f), ActorSpawnParams);
+            }
+            break;
+        }
+        case 2: {
+            if (IsValid(EnemyExucutorClass)) {
+                return GetWorld()->SpawnActor<AEnemy11_Robot_Executor>(EnemyExucutorClass, RandomLocationToSpawn, FRotator(0.0f, 0.0f, 0.0f), ActorSpawnParams);
+            }
+            break;
+        }
+        case 3: {
+            if (IsValid(EnemyBatClass)) {
+                return GetWorld()->SpawnActor<AEnemy15_Bat_1>(EnemyBatClass, RandomLocationToSpawn, FRotator(0.0f, 0.0f, 0.0f), ActorSpawnParams);
+            }
+            break;
+        }
+        case 4: {
+            if (IsValid(EnemyHunterClass)) {
+                return GetWorld()->SpawnActor<AEnemy19_Hunter_Sniper>(EnemyHunterClass, RandomLocationToSpawn, FRotator(0.0f, 0.0f, 0.0f), ActorSpawnParams);
+            }
+            break;
+        }
+        case 5: {
+            if (IsValid(EnemySwatClass)) {
+                return GetWorld()->SpawnActor<AEnemy27_Swat>(EnemySwatClass, RandomLocationToSpawn, FRotator(0.0f, 0.0f, 0.0f), ActorSpawnParams);
+            }
+            break;
+        }
+        case 6: {
+            if (IsValid(EnemyScorpioClass)) {
+                return GetWorld()->SpawnActor<AEnemy29_Scorpio>(EnemyScorpioClass, RandomLocationToSpawn, FRotator(0.0f, 0.0f, 0.0f), ActorSpawnParams);
+            }
+            break;
+        }
+    }
+    return GetWorld()->SpawnActor<AEnemy29_Scorpio>(EnemyScorpioClass, RandomLocationToSpawn, FRotator(0.0f, 0.0f, 0.0f), ActorSpawnParams);
 }
 
 AEnemyClass* ATrueProject2GameModeBase::GenerateEliteEnemy() {
+    int chosenNumber = FMath::RandRange(1, eliteEnemy);
+
     FActorSpawnParameters ActorSpawnParams;
     ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-    return GetWorld()->SpawnActor<AEnemy1_Bird>(EnemyBirdClass, RandomLocationToSpawn, FRotator(0.0f, 0.0f, 0.0f), ActorSpawnParams);
+    switch (chosenNumber) {
+        case 1: {
+            if (IsValid(EnemyPapuClass)) {
+                return GetWorld()->SpawnActor<AEnemy10_Robot_Papu>(EnemyPapuClass, RandomLocationToSpawn, FRotator(0.0f, 0.0f, 0.0f), ActorSpawnParams);
+            }
+            break;
+        }
+        case 2: {
+            if (IsValid(EnemyMiniBotClass)) {
+                return GetWorld()->SpawnActor<AEnemy24_MiniBot>(EnemyMiniBotClass, RandomLocationToSpawn, FRotator(0.0f, 0.0f, 0.0f), ActorSpawnParams);
+            }
+            break;
+        }
+    }
+
+    return GetWorld()->SpawnActor<AEnemy24_MiniBot>(EnemyMiniBotClass, RandomLocationToSpawn, FRotator(0.0f, 0.0f, 0.0f), ActorSpawnParams);
 }
 
 AEnemyClass* ATrueProject2GameModeBase::GenerateBossEnemy() {
+    int chosenNumber = FMath::RandRange(1, bossEnemy);
+
     FActorSpawnParameters ActorSpawnParams;
     ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-    return GetWorld()->SpawnActor<AEnemy1_Bird>(EnemyBirdClass, RandomLocationToSpawn, FRotator(0.0f, 0.0f, 0.0f), ActorSpawnParams);
-}
-
-
-void ATrueProject2GameModeBase::SetMinRadio(float radioValue)
-{
-    minRadio = radioValue;
-}
-void ATrueProject2GameModeBase::SetMaxRadio(float radioValue)
-{
-    maxRadio = radioValue;
-}
-void ATrueProject2GameModeBase::SetSpawnRate(float newSpawnRate)
-{
-    EnemySpawnRate = newSpawnRate;
-}
-
-void ATrueProject2GameModeBase::RefreshEnemiesList()
-{
-    for (AEnemyClass* EnemyDelta : EnemiesSpawned)
-    {
-        if (!IsValid(EnemyDelta))
-        {
-            EnemiesSpawned.Remove(EnemyDelta);
-        }
+    if (IsValid(EnemySpiderQueenClass)) {
+        return GetWorld()->SpawnActor<AEnemy26_Spider_Queen>(EnemySpiderQueenClass, RandomLocationToSpawn, FRotator(0.0f, 0.0f, 0.0f), ActorSpawnParams);
     }
-}
 
-// this method only work if the total time duration is multiple of 24
-bool ATrueProject2GameModeBase::RealWorldTimeChanged()
-{
-    return CurrentDayTimeInSeconds % oneHourInGame == 0.0f;
-}
-void ATrueProject2GameModeBase::RealWorldTimeConverter()
-{
-    realWorldTime = CurrentDayTimeInSeconds / oneHourInGame;
-}
-
-// Time Stats for display
-float ATrueProject2GameModeBase::GiveTimePercentage()
-{
-    return dayTimePercentage;
-}
-
-FText ATrueProject2GameModeBase::GiveRealWorldTime()
-{
-    int32 TimePercentage = FMath::RoundHalfFromZero(dayTimePercentage * 100);
-    FString TimePercentageString = FString::FromInt(TimePercentage);
-    FString TimePercentageHUD = TimePercentageString + FString(TEXT(":00"));
-    FText TimePercentageTEXT = FText::FromString(TimePercentageHUD);
-    return TimePercentageTEXT;
+    return GetWorld()->SpawnActor<AEnemy26_Spider_Queen>(EnemySpiderQueenClass, RandomLocationToSpawn, FRotator(0.0f, 0.0f, 0.0f), ActorSpawnParams);
 }

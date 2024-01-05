@@ -11,6 +11,7 @@
 #include "Components/TimelineComponent.h"
 #include "Curves/CurveVector.h"
 
+#include "TrueProject2GameModeBase.h"
 #include "TrueGame2Instance.h"
 #include "Common_Enums.h"
 
@@ -31,7 +32,7 @@ enum class ESpecialStatus : uint8
 };
 
 UCLASS(BlueprintType, Blueprintable)
-class TRUEPROJECT2_API AAllCharactersClass : public ACharacter
+class LIMITLESS_API AAllCharactersClass : public ACharacter
 {
 	GENERATED_BODY()
 
@@ -55,19 +56,48 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health", meta = (AllowPrivateAccess = "true"))
 		class UHealthComponent* Health;
 
+	// Health Regenerate
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health Stats Regeration", meta = (AllowPrivateAccess = "true"))
+		float HealthPointRegenerate = 1.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health Stats Regeration", meta = (AllowPrivateAccess = "true"))
+		float HealthRegenerateTime = 5.0f;
+	UPROPERTY(EditAnywhere, Category = "Health Regeration")
+		FTimerHandle HealthRegenerateTimerHandle;
+
+	UFUNCTION(BlueprintCallable, Category = "Health Regeration")
+		void HealthRegenerate();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health Stats Control", meta = (AllowPrivateAccess = "true"))
+		float initHealth = 10.0f;
+
 	// Power Component
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Health", meta = (AllowPrivateAccess = "true"))
 		class UCharacterPowerComponent* PowerComponent;
 
 	// Speed and Rotation
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	FVector CharacterVelocity;
+		FVector CharacterVelocity;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	float CharacterSpeed;
-	
+		float CharacterSpeed;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+		float CharacterMaxSpeed = 500.0f;
 	// Fly Configuration
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 		bool bIsFlying;
+
+	// Power Component Management
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Power Stats Control")
+		float initPower = 5.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Power Stats Control")
+		float initCritChance = 5.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Power Stats Control")
+		float initCritMult = 1.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Power Stats Control")
+		float initAttackSpeed = 1.0f;
 
 	/* Speed:
 	* The player speed is a sum of different factors -> almost never change the default speed, only change other factors
@@ -80,17 +110,17 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "Speed Control")
 		void ResetAllSpeedFactors();
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Control")
-		float DefaultMoveSpeed; // should only changed permanently
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Control To Set")
+		float DefaultMoveSpeed = 700.0f; // should only changed permanently
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Control")
 		float DefaultMoveSpeedRatio = 1.0f; // should only changed permanently
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Control")
-		float MoveSpeed;
+		float MoveSpeed = DefaultMoveSpeed;
 	UFUNCTION(BlueprintCallable, Category = "Speed Control")
 		void UpdateDefaultMoveSpeedRatio(float ratio);
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Control")
-		float DefaultRunSpeed;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Control To Set")
+		float DefaultRunSpeed = 300.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Control")
 		float RunSpeed = 0.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Control")
@@ -101,17 +131,13 @@ protected:
 		void ResetRunSpeedRatio();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Control")
-		float DefaultSpeedBoost;
+		float DefaultSpeedBoost = 100.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Control")
 		float SpeedBoost = 0.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Control")
 		float SpeedBoostRatio = 1.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Control")
 		FTimerHandle SpeedBoosterTimerHandle;
-	/*
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Control")
-		float SpeedBoosterDuration = 5.0f;
-	*/
 
 	UFUNCTION(BlueprintCallable, Category = "Speed Control")
 		void UpdateSpeedBoostRatio(float ratio);
@@ -119,7 +145,7 @@ protected:
 		void ResetSpeedBoost();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Control")
-		float DefaultStatusSpeedBoost;
+		float DefaultStatusSpeedBoost = 100.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Control")
 		float StatusSpeedBoost = 0.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Control")
@@ -138,31 +164,45 @@ protected:
 		float DashDistance; //-> maybe for main only 
 	
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Control")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Control To Set")
 		float ExtraSpeed = 0.0f;
 	UFUNCTION(BlueprintCallable, Category = "Speed Control")
 		void UpdateExtraSpeed(float ASpeed);
 	UFUNCTION(BlueprintCallable, Category = "Speed Control")
 		void ResetExtraSpeed();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Control")
+		float ImmovilizeSpeed = 50.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Speed Control")
+		FTimerHandle ImmovilizeTimerHandle;
+	
 	// Add lots of check for each movement, sprint, jump, crouch, dash
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement Control")
-		bool isRunning;
+		bool isRunning = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement Control")
-		bool isCrouching;
+		bool ableToRun = true;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement Control")
-		bool isSliding;
+		bool isCrouching = false;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement Control")
-		bool bToSlide;
+		bool isSliding = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement Control")
+		bool bToSlide = false;
 	FTimerHandle SlidingCooldownTimerHandle;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement Control")
-		bool isDashing; 
+		bool isDashing = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Movement Control")
+		bool isAbleToDash = false;
 
 	// Camera Stats
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
-		FVector CameraLocationStand = FVector(-300.f, 0.f, 80.f);
+		FVector CameraLocationStand = FVector(0.f, 0.f, 0.f);
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
-		FVector CameraLocationCrouch = FVector(-300.f, 0.f, 40.f);
+		FRotator CameraRotationStand = FRotator(0.f, 0.f, 0.f);
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
+		FVector CameraLocationCrouch = FVector(0.f, 0.f, 0.f);
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Camera")
+		FRotator CameraRotationCrouch = FRotator(0.f, 0.f, 0.f);
 	
 	
 	// Simulate Tick Function
@@ -178,6 +218,9 @@ protected:
 
 	UFUNCTION(BlueprintCallable, Category = "Detect")
 		void DetectReaction();
+
+	UFUNCTION(BlueprintCallable, Category = "Detect")
+		virtual void BeDetected();
 
 	// Line Trace detection
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Line Trace")
@@ -207,6 +250,10 @@ protected:
 		float GiveXPPercentage();
 	UFUNCTION(BlueprintCallable, Category = "XP")
 		FText GiveLevelText();
+	UFUNCTION(BlueprintCallable, Category = "XP")
+		float GiveXP();
+	UFUNCTION(BlueprintCallable, Category = "XP")
+		float GiveXPRequired();
 
 	virtual void UpdateBasicStatsByLevelingUp();
 
@@ -279,10 +326,12 @@ public:
 	// virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	// return Componenets values
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "Health")
 		float GiveHealthPercentage();
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, Category = "Health")
 		float GetCharacterHealth();
+	UFUNCTION(BlueprintCallable, Category = "Health")
+		float GetCharacterMaxHealth();
 
 	UFUNCTION(BlueprintCallable, Category = "Camera")
 		FVector GetForwardDirection();
@@ -321,10 +370,12 @@ public:
 	// Health Component Management
 	// Set max health -> set the maxHealth and Health value to character as init
 	UFUNCTION(BlueprintCallable, Category = "Stats Control")
-		void InitCharacHealth(float InitHealth);
+		void InitCharacHealth(float HP);
 
 	UFUNCTION(BlueprintCallable, Category = "Stats Control")
 		void UpdateHealthPoint(float healthModifier);
+	UFUNCTION(BlueprintCallable, Category = "Stats Control")
+		void FullHeal();
 	UFUNCTION(BlueprintCallable, Category = "Stats Control")
 		void UpdateHealthByCurrentPercentage(float healthModifier);
 	UFUNCTION(BlueprintCallable, Category = "Stats Control")
@@ -371,7 +422,8 @@ public:
 		void ReceiveSpeedBoost(float ratio, float SpeedBoosterDuration);
 	UFUNCTION(BlueprintCallable, Category = "Speed Control")
 		void ReceiveStatusSpeedBoost(float statusduration, float ratio);
-
+	UFUNCTION(BlueprintCallable, Category = "Speed Control")
+		void Immovilize(float immovilzeTime);
 
 	UFUNCTION(BlueprintCallable, Category = "Movement Control")
 		void SetDashDistance(float initSpeed);

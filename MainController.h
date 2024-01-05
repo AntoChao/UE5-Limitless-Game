@@ -5,13 +5,14 @@
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerController.h"
 #include "InputActionValue.h"
+#include "Main.h"
 #include "MainController.generated.h"
 
 /**
  *
  */
 UCLASS()
-class TRUEPROJECT2_API AMainController : public APlayerController
+class LIMITLESS_API AMainController : public APlayerController
 {
 	GENERATED_BODY()
 
@@ -25,6 +26,8 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input, meta = (AllowPrivateAccess = "true"))
 		class UInputMappingContext* DefaultMappingContext;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input, meta = (AllowPrivateAccess = "true"))
+		AMain* MainCharacter = nullptr;
 	// Game Escape Pause
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input, meta = (AllowPrivateAccess = "true"))
 		class UInputAction* PauseGameAction;
@@ -49,6 +52,17 @@ protected:
 		int JumpCounter = 0;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input)
 		int StopJumpCounter = 0;
+
+	FTimerHandle ResetJumpTimer;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+		bool AbleToJump = true;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Input")
+		float JumpBreakTime = 0.5f;
+
+	UFUNCTION()
+		void ResetJump();
+	
+	
 
 	// DashAction
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Input, meta = (AllowPrivateAccess = "true"))

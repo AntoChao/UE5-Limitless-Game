@@ -19,7 +19,7 @@
 #include "Main.generated.h"
 
 UCLASS(BlueprintType, Blueprintable)
-class TRUEPROJECT2_API AMain : public AAllCharactersClass
+class LIMITLESS_API AMain : public AAllCharactersClass
 {
 	GENERATED_BODY()
 
@@ -100,7 +100,10 @@ protected:
 		void ResetCalmMultiplier();
 
 	// Ability Select
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ability")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ability System")
+		TSubclassOf<class AAbilitySystem> AbilitySystemClass;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ability System")
 		class AAbilitySystem* AbilitySystem;
 
 	// AbilityRequiredInfo
@@ -306,9 +309,40 @@ protected:
 		TSubclassOf<class AWeapon_MomFoot> AWeapon_MomFoot_Class;
 
 public:	
-	// Game Instance
-	UFUNCTION(BlueprintCallable, Category = "Game Instance")
-		void SetStatsToGameInstance();
+	/*Fail Ending*/
+	UFUNCTION(BlueprintCallable, Category = "Game Over")
+		void GameOverPlayerDied(); 
+
+	/*True Ending*/
+	UFUNCTION(BlueprintCallable, Category = "Game Over")
+		void CheckTruePowerWin();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Game Over")
+		int ArtifactAmountRequired = 10;
+
+	UFUNCTION(BlueprintCallable, Category = "Game Over")
+		void GameOverTruePower(); 
+
+	/*Time Freezed Ending*/
+	UFUNCTION(BlueprintCallable, Category = "Game Over")
+		void GameOverTimeFreezed();
+
+	/*Step Void Ending*/
+	UFUNCTION(BlueprintCallable, Category = "Game Over")
+		void GameOverStepedVoid();
+
+
+	// PostGame Setter & Getter
+	UFUNCTION(BlueprintCallable, Category = "PostGame")
+		int GetTotalDamageDealed();
+	UFUNCTION(BlueprintCallable, Category = "PostGame")
+		int GetTotalDamageTaken();
+	UFUNCTION(BlueprintCallable, Category = "PostGame")
+		int GetTotalEnemiesKilled();
+	UFUNCTION(BlueprintCallable, Category = "PostGame")
+		int GetTotalXP();
+	UFUNCTION(BlueprintCallable, Category = "PostGame")
+		int GetAmountArtifact();
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -316,6 +350,7 @@ public:
 	// Game Instance stuff
 	UFUNCTION(BlueprintCallable, Category = "Detection Component")
 		void UpdateTotalDamage(float damage);
+
 	// at default +1
 	UFUNCTION(BlueprintCallable, Category = "Detection Component")
 		void UpdateTotalEnemiesKilled();
@@ -343,7 +378,7 @@ public:
 		UPlayerStatsUMG* GetPlayerUIWidget();
 
 	UFUNCTION(BlueprintCallable, Category = "Main UI")
-		void UpdateDisplayVariables();
+		void UpdateDisplayMainVariables();
 
 	// Controller
 	UFUNCTION(BlueprintCallable, Category = "Main Controller")
@@ -413,9 +448,18 @@ public:
 	// return Componenets values
 	// is defined in allCharacter virtual float GiveHealthPercentage() override;
 	UFUNCTION(BlueprintCallable)
-		virtual float GiveFrenzyPercentage();
+		float GiveFrenzyPercentage();
 	UFUNCTION(BlueprintCallable)
-		virtual float GiveCalmPercentage();
+		float GiveFrenzy();
+	UFUNCTION(BlueprintCallable)
+		float GiveMaxFrenzy();
+
+	UFUNCTION(BlueprintCallable)
+		float GiveCalmPercentage();
+	UFUNCTION(BlueprintCallable)
+		float GiveCalm();
+	UFUNCTION(BlueprintCallable)
+		float GiveMaxCalm();
 
 	UFUNCTION(BlueprintCallable)
 		void ChangeMainFrenzy(float modifier);
@@ -499,6 +543,11 @@ public:
 		void DestroyBulletTimeNiagara();
 
 	// Ability FForward
+	float FForwardDilation = 1.0f;
+	UFUNCTION(BlueprintCallable, Category = "Ability")
+		float GetFForwardDilation();
+	UFUNCTION(BlueprintCallable, Category = "Ability")
+		void SetFForwardDilation(float newvalue);
 	UFUNCTION(BlueprintCallable, Category = "Ability")
 		void SetIsFForwardNiagaraSpawned(bool SpawnState);
 	UFUNCTION(BlueprintCallable, Category = "Ability")
@@ -507,4 +556,11 @@ public:
 		void AttachFForwardNiagara();
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "Ability")
 		void DestroyFForwardNiagara();
+
+	// Time Dilation
+	FTimerHandle ResetTimeDilationTimer;
+	UFUNCTION(BlueprintCallable, Category = "Ability")
+		void CustomRunResetDilationTimer(float segs);
+	UFUNCTION(BlueprintCallable, Category = "Ability")
+		void ResetTimeDilation();
 };

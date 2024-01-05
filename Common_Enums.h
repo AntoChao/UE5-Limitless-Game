@@ -6,12 +6,22 @@
 #include "GameFramework/Actor.h"
 #include "Common_Enums.generated.h"
 
-UENUM()
-enum class EGamePlayState
+UENUM(BlueprintType, Blueprintable)
+enum class EGamePlayState : uint8
 {
 	EPreparing,
 	EPlaying,
 	EGameOver
+};
+
+UENUM(BlueprintType, Blueprintable)
+enum class EGameOverReason : uint8
+{
+	ETrueEnding,
+	EFalseEnding,
+	EFailMission,
+	ETimeFreezed,
+	EEmbraceVoid
 };
 
 // A ENUM THAT REPRESENT ALL ABILITIES: INCLUDING WEAPON -> replace ability code
@@ -57,32 +67,13 @@ enum class EObjectiveStatus : uint8
 UENUM(BlueprintType, Blueprintable)
 enum class ELanguageSelected : uint8
 {
-	EEnglish,
-	EChinese,
-	ESpanish,
-	EUnknown
+	English,
+	Chinese,
+	Spanish
 };
 
 UENUM(BlueprintType, Blueprintable)
-enum class EDamageColor : uint8
-{
-	ERed,
-	ERedPurple,
-	ERedBlack,
-	EUnknown
-};
-
-UCLASS()
-class TRUEPROJECT2_API ACommon_Enums : public AActor
-{
-	GENERATED_BODY()
-
-public:
-	ACommon_Enums();
-};
-
-UENUM()
-enum class EFloorType
+enum class EFloorType : uint8
 {
 	EConcrete,
 	EGlass,
@@ -90,8 +81,8 @@ enum class EFloorType
 	ESand
 };
 
-UENUM()
-enum class EEnemyRarity
+UENUM(BlueprintType, Blueprintable)
+enum class EEnemyRarity : uint8
 {
 	ENormal,
 	ESpecial,
@@ -99,4 +90,13 @@ enum class EEnemyRarity
 	EBoss,
 	EGigaBoss,
 	EUnknown
+};
+
+UCLASS()
+class LIMITLESS_API ACommon_Enums : public AActor
+{
+	GENERATED_BODY()
+
+public:
+	ACommon_Enums();
 };
