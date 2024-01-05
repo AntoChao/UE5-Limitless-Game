@@ -7,7 +7,7 @@
 #include "Ability_AlienGun.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AAbility_AlienGun : public AGeneralAbilityClass
+class LIMITLESS_API AAbility_AlienGun : public AGeneralAbilityClass
 {
 	GENERATED_BODY()
 	
@@ -16,9 +16,7 @@ public:
 	AAbility_AlienGun(const class FObjectInitializer& ObjectInitialize);
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
+	
 	// specific stats
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy")
 		class AEnemyClass* Enemy;
@@ -27,8 +25,6 @@ protected:
 		FVector MuzzleOffset;
 
 public:
-	virtual bool AbilityRequirement(UData_AbilityRequiredInfo* requiredInfo) override;
-
 	virtual void ActivateAbilityEffect(UData_AbilityRequiredInfo* requiredInfo) override;
 
 };

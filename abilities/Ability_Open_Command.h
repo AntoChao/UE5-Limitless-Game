@@ -11,7 +11,7 @@ This ability is just to spawm a black hole bomb with corresponding functionality
 */
 
 UCLASS()
-class TRUEPROJECT2_API AAbility_Open_Command : public AGeneralAbilityClass
+class LIMITLESS_API AAbility_Open_Command : public AGeneralAbilityClass
 {
 	GENERATED_BODY()
 	
@@ -20,12 +20,7 @@ public:
 	AAbility_Open_Command(const class FObjectInitializer& ObjectInitializer);
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
-	/*
-	I will implement the logic on Ability system or Main
-	*/
+	/* I will implement the logic on Ability system or Main */
 
 	//Open command ability will constantly checking main input -> but these input may 
 	// be stored in ability system -> which is better idea "maybe"
@@ -45,7 +40,5 @@ protected:
 	void ExecuteTheCommand();
 
 public:	
-	virtual bool AbilityRequirement(UData_AbilityRequiredInfo* requiredInfo) override;
-
 	virtual void ActivateAbilityEffect(UData_AbilityRequiredInfo* requiredInfo) override;
 };

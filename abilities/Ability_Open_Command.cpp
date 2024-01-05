@@ -12,31 +12,7 @@
 
 // Sets default values
 AAbility_Open_Command::AAbility_Open_Command(const class FObjectInitializer& ObjectInitializer)
-	:Super(ObjectInitializer)
-{
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
-
-}
-
-// Called when the game starts or when spawned
-void AAbility_Open_Command::BeginPlay()
-{
-	Super::BeginPlay();
-}
-
-bool AAbility_Open_Command::AbilityRequirement(UData_AbilityRequiredInfo* requiredInfo)
-{
-	if (requiredInfo->GetPlayerFrenzy() >= FrenzyCost->GetFrenzy())
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Yellow, TEXT("USING Bomb"));
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-	
+	:Super(ObjectInitializer){
 }
 
 /*  ActivateAbilityEffect has 3 process

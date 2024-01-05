@@ -12,28 +12,11 @@
 
 // Sets default values
 AAbility_Blade::AAbility_Blade(const class FObjectInitializer& ObjectInitializer)
-	:Super(ObjectInitializer)
-{
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	:Super(ObjectInitializer) {
 }
 
-// Called when the game starts or when spawned
-void AAbility_Blade::BeginPlay()
-{
-	Super::BeginPlay();
-}
-
-bool AAbility_Blade::AbilityRequirement(UData_AbilityRequiredInfo* requiredInfo)
-{
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, TEXT("USING BLADE"));
-	return true;
-}
-
-void AAbility_Blade::ActivateAbilityEffect(UData_AbilityRequiredInfo* requiredInfo)
-{
+void AAbility_Blade::ActivateAbilityEffect(UData_AbilityRequiredInfo* requiredInfo) {
 	requiredInfoContainer = requiredInfo;
 
 	// do the effect
-
 }

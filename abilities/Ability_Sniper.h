@@ -7,7 +7,7 @@
 #include "Ability_Sniper.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AAbility_Sniper : public AGeneralAbilityClass
+class LIMITLESS_API AAbility_Sniper : public AGeneralAbilityClass
 {
 	GENERATED_BODY()
 	
@@ -16,21 +16,14 @@ public:
 	AAbility_Sniper(const class FObjectInitializer& ObjectInitializer);
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-	
 	// specific stats
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ability Stats")
-		FVector DistanceVector;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ability Stats")
-		float Distance;
+		float MaxDistance = 3000.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Enemy")
 		class AEnemyClass* Enemy;
 
 public:	
-	virtual bool AbilityRequirement(UData_AbilityRequiredInfo* requiredInfo) override;
-
 	virtual void ActivateAbilityEffect(UData_AbilityRequiredInfo* requiredInfo) override;
 
 	virtual float CalculateSpecialDamage(UData_AbilityRequiredInfo* requiredInfo) override;

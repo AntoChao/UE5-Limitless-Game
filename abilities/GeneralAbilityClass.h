@@ -17,8 +17,10 @@
 #include "MediaSoundComponent.h"
 #include "MediaSource.h"
 
-#include "../Main.h"
+#include "Sound/SoundCue.h"
+#include "Components/AudioComponent.h"
 
+#include "../Main.h"
 #include "../Common_Enums.h"
 #include "GeneralAbilityClass.generated.h"
 
@@ -195,7 +197,7 @@ Upgrade == = Customeze != Level Up
 
 
 UCLASS(Blueprintable, BlueprintType)
-class TRUEPROJECT2_API AGeneralAbilityClass : public AActor
+class LIMITLESS_API AGeneralAbilityClass : public AActor
 {
 	GENERATED_BODY()
 	
@@ -225,12 +227,9 @@ protected:
 	// Ability Info For Displaying
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Display Stat")
 		class UTexture2D* AbilityImage;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Display Stat")
-		class UMediaSource* AbilityVideoSource;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Display Stat")
-		class UMediaSoundComponent* AbilityVideoSound;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats")
+		USoundCue* AbilitySound;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Display Stat")
 		FString AbilityNameEng;
@@ -251,30 +250,49 @@ protected:
 	// stats needed -> should be clasify or all of them should be calculate and not a flat point
 	// Damage Component
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats", meta = (AllowPrivateAccess = "true"))
-		class UDamageComponent* Damage;
+		float baseDamage = 5.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats", meta = (AllowPrivateAccess = "true"))
+		float baseCritChance = 5.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats", meta = (AllowPrivateAccess = "true"))
+		float baseCritMultiplier = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats", meta = (AllowPrivateAccess = "true"))
+		float abilityRate = 1.0f;
 
 	// Frenzy Component
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats", meta = (AllowPrivateAccess = "true"))
-		class UFrenzyComponent* FrenzyCost;
+		int frenzyCost = 0;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats", meta = (AllowPrivateAccess = "true"))
-		class UFrenzyComponent* FrenzyReward;
+		int frenzyReward = 0;
 	// Calm Component
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats", meta = (AllowPrivateAccess = "true"))
-		class UCalmComponent* CalmCost;
+		int calmCost = 0;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats", meta = (AllowPrivateAccess = "true"))
-		class UCalmComponent* CalmReward;
+		int calmReward = 0;
 	// XP Component
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Stats", meta = (AllowPrivateAccess = "true"))
-		class UXPComponent* XP;
+		int XPReward = 0;
+
 	// Feedback container
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ability", meta = (AllowPrivateAccess = "true"))
-		class UData_AbilityFeedBackInfo* feedBackContainer;
+		class UData_AbilityFeedBackInfo* feedBackContainer = nullptr;
 
-	float radioImpact = 0.0f;
-	float duration = 0.0f;
-	float range = 0.0f;
-	float moveSpeedReward = 0.0f;
-	bool doSelfDamage = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ability", meta = (AllowPrivateAccess = "true"))
+		float radioImpact = 0.0f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ability", meta = (AllowPrivateAccess = "true"))
+		float duration = 0.0f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ability", meta = (AllowPrivateAccess = "true"))
+		float range = 0.0f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ability", meta = (AllowPrivateAccess = "true"))
+		float moveSpeedReward = 0.0f;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Ability", meta = (AllowPrivateAccess = "true"))
+		bool doSelfDamage = false;
 
 public:
 	// Return Display Stats
@@ -288,49 +306,44 @@ public:
 		FString GetAbilityName(ELanguageSelected ALanguage);
 	UFUNCTION(BlueprintCallable, Category = "Display Stat")
 		FString GetAbilityDiscription(ELanguageSelected ALanguage);
-	UFUNCTION(BlueprintCallable, Category = "Display Stat")
-		UMediaSource* GetAbilityVideoSource();
-	UFUNCTION(BlueprintCallable, Category = "Display Stat")
-		UMediaSoundComponent* GetAbilityVideoSound();
 
 	// evaluate the requirement of the ability -> will have lots of parameters 
-	virtual bool AbilityRequirement(UData_AbilityRequiredInfo* requiredInfo);
+	UFUNCTION(BlueprintCallable, Category = "Ability")
+		virtual bool AbilityRequirement(UData_AbilityRequiredInfo* requiredInfo);
 
 	// calculate stats to store in components -> all calculation is responsability of each components
 
 	// Activate the ability in general -> the reception of ability system
-	UData_AbilityFeedBackInfo* Activate(UData_AbilityRequiredInfo* requiredInfo);
+	UFUNCTION(BlueprintCallable, Category = "Ability")
+		UData_AbilityFeedBackInfo* Activate(UData_AbilityRequiredInfo* requiredInfo);
 
 	// activate ability based on lv, maybe each lv act totally different
-	virtual void ActivateAbilityEffect(UData_AbilityRequiredInfo* requiredInfo);
+	UFUNCTION(BlueprintCallable, Category = "Ability")
+		virtual void ActivateAbilityEffect(UData_AbilityRequiredInfo* requiredInfo);
 
-	void CreateFeedBackContainer();
-
-	void CustomizeStatsPerAbility(float VALUEbaseDamage,
-								float VALUECritChance,
-								float VALUECritMultiplier,
-								float VALUEfireRate,
-								float VALUEradioImpact,
-								float VALUEduration,
-								float VALUErange,
-								bool VALUEdoSelfDamage,
-								float VALUEbaseFrenzyCost,
-								float VALUEbaseFrenzyReward,
-								float VALUEbaseCalmCost,
-								float VALUEbaseCalmReward,
-								float VALUEmoveSpeedReward,
-								int VALUEbaseXP);
+	UFUNCTION(BlueprintCallable, Category = "Ability")
+		void CreateFeedBackContainer();
 
 	// overall functions/ common abilities functions
-	virtual void ApplyDamageToEnemy(AEnemyClass* EnemySelected, float TheDamage, UData_AbilityRequiredInfo* requiredInfo);
+	UFUNCTION(BlueprintCallable, Category = "Ability")
+		virtual void ApplyDamageToEnemy(AEnemyClass* EnemySelected, float TheDamage, UData_AbilityRequiredInfo* requiredInfo);
 
 	// calculate per ability -> override
-	virtual float CalculateGeneralDamage(UData_AbilityRequiredInfo* requiredInfo);
+	UFUNCTION(BlueprintCallable, Category = "Ability")
+		virtual float CalculateGeneralDamage(UData_AbilityRequiredInfo* requiredInfo);
+
+	UFUNCTION(BlueprintCallable, Category = "Ability")
+		float CalculateDamage(UCharacterPowerComponent* PowerComponent);
+	
+	UFUNCTION(BlueprintCallable, Category = "Ability")
+		bool CritictStrike(float Probability);
 
 	// calculate per ability -> override
-	virtual float CalculateSpecialDamage(UData_AbilityRequiredInfo* requiredInfo);
+	UFUNCTION(BlueprintCallable, Category = "Ability")
+		virtual float CalculateSpecialDamage(UData_AbilityRequiredInfo* requiredInfo);
 
 	// setter and getter
-	float GetAbilityFireRate();
+	UFUNCTION(BlueprintCallable, Category = "Ability")
+		float GetAbilityFireRate();
 };
 

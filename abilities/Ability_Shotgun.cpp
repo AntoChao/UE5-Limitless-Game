@@ -13,64 +13,69 @@
 
 // Sets default values
 AAbility_Shotgun::AAbility_Shotgun(const class FObjectInitializer& ObjectInitializer)
-	:Super(ObjectInitializer)
-{
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+	:Super(ObjectInitializer) {
 }
 
-// Called when the game starts or when spawned
-void AAbility_Shotgun::BeginPlay()
-{
-	Super::BeginPlay();
+void AAbility_Shotgun::ActivateAbilityEffect(UData_AbilityRequiredInfo* requiredInfo) {
+    FVector EnemyDirection = requiredInfo->GetHitResult().TraceEnd;
+    FVector ShotgunLocation = requiredInfo->GetPlayer()->GetActorLocation();
 
+    TArray<FVector> SpreadDirections = CalculateSpreadDirections(ShotgunLocation,
+        EnemyDirection);
+    
+    FHitResult HitResult;
+    FCollisionQueryParams CollisionParams;
+    CollisionParams.AddIgnoredActor(this); // Ignore the shotgun actor
+    CollisionParams.AddIgnoredActor(requiredInfo->GetPlayer());
+
+    // Fire traces for each spread direction
+    for (FVector Direction : SpreadDirections) {
+        FVector EndPoint = ShotgunLocation + Direction * MaxDistance;
+
+        bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult,
+            ShotgunLocation, EndPoint, ECC_Visibility, CollisionParams);
+
+        // Draw debug line for visualization
+        if (bHit) {
+            if (IsValid(HitResult.GetActor())) {
+                AEnemyClass* EnemyDelta = Cast<AEnemyClass>(HitResult.GetActor());
+                if (IsValid(EnemyDelta)) {
+                    ApplyDamageToEnemy(EnemyDelta, CalculateShotgunDamage(HitResult, requiredInfo), requiredInfo);
+                }
+            }
+        }
+    }
 }
 
-// Define its requirement
-bool AAbility_Shotgun::AbilityRequirement(UData_AbilityRequiredInfo* requiredInfo)
-{
-	// GEngine->AddOnScreenDebugMessage(-1, 3.0f, FColor::Yellow, TEXT("USING SHOTGUN"));
-	return true;
+TArray<FVector> AAbility_Shotgun::CalculateSpreadDirections(FVector ShotgunLocation, FVector DestinationLocation) {
+    TArray<FVector> SpreadDirections;
+
+    FVector ShotgunToDestination = (DestinationLocation - ShotgunLocation).GetSafeNormal();
+    FVector ShotgunForward = FVector::ForwardVector; // Define your shotgun's forward vector
+
+    for (int32 i = 0; i < NumberOfTraces; ++i) {
+        // Randomly deviate from the shotgun's forward direction within the spread angle
+        FRotator RandomRotation = FRotator(FMath::RandRange(-ConeAngle, ConeAngle), FMath::RandRange(-ConeAngle, ConeAngle), 0.0f);
+        FVector SpreadDirection = RandomRotation.RotateVector(ShotgunToDestination);
+
+        SpreadDirections.Add(SpreadDirection);
+    }
+
+    return SpreadDirections;
 }
 
-void AAbility_Shotgun::ActivateAbilityEffect(UData_AbilityRequiredInfo* requiredInfo)
-{
-	// do the effect
-	if (IsValid(requiredInfo->GetHitResult().GetActor()))
-	{
-		// will give error if somehow the traceline hits the main and not the enemy
-		if (requiredInfo->GetHitResult().GetActor()->GetClass()->IsChildOf(AEnemyClass::StaticClass()))
-		{
-			AEnemyClass* EnemyDelta = Cast<AEnemyClass>(requiredInfo->GetHitResult().GetActor());
+float AAbility_Shotgun::CalculateShotgunDamage(FHitResult HitResult,
+    UData_AbilityRequiredInfo* requiredInfo) {
 
-			ApplyDamageToEnemy(EnemyDelta, CalculateSpecialDamage(requiredInfo), requiredInfo);
-		}
-	}
+    float Distance = HitResult.Distance;
+    float GeneralDamage = CalculateGeneralDamage(requiredInfo);
 
-	// Calculate the feedback -> override all calculation
-	// freCost, freReward, cocost, coReward, moveSpeedRew, Xp
-	//CalculateXP();
-}
+    float DamageDealed = FMath::Lerp(GeneralDamage, 0.0f, Distance / MaxDistance);
 
-float AAbility_Shotgun::CalculateSpecialDamage(UData_AbilityRequiredInfo* requiredInfo)
-{
-	//DistanceVector = requiredInfo->GetPlayerLocation() - requiredInfo->GetHitResult().GetActorLocation();
-	Distance = requiredInfo->GetHitResult().Distance / 100;//->Distance en meters
-
-	float GeneralDamage = CalculateGeneralDamage(requiredInfo);
-	// modify, just testing
-	if (Distance < 10)
-	{
-		// TOO BUSTED -> NO WAY THIS CALCULATION
-		return GeneralDamage * Distance;
-	}
-	else
-		if (Distance < 30)
-		{
-			return GeneralDamage * (Distance * 0.5);
-		}
-		else
-		{
-			return GeneralDamage * (Distance * 0.2);
-		}
+    if (DamageDealed >= 0) {
+        return DamageDealed;
+    }
+    else {
+        return 0;
+    }
 }

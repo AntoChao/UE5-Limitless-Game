@@ -7,7 +7,7 @@
 #include "Ability_FForward.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AAbility_FForward : public AGeneralAbilityClass
+class LIMITLESS_API AAbility_FForward : public AGeneralAbilityClass
 {
 	GENERATED_BODY()
 	
@@ -16,23 +16,19 @@ public:
 	AAbility_FForward(const class FObjectInitializer& ObjectInitializer);
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
 
 	UWorld* CurrentWorld;
 	AMain* MainPlayer;
 
-	FTimerHandle FFowardTimer;
-	float FFowardDuration = 5.0f;
-	void ResetTimeDilation();
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effect")
+		float FFowardDuration = 5.0f;
 
 	// specific stats
-	float NormalTimeDilation = 1.0f;
-	float TimeDilationMultiplier = 1.5f;
-	float CurrentTimeDilation = 1.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effect")
+		float NormalTimeDilation = 1.0f;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effect")
+		float TimeDilationMultiplier = 1.5f;
 
 public:	
-	virtual bool AbilityRequirement(UData_AbilityRequiredInfo* requiredInfo) override;
-
 	virtual void ActivateAbilityEffect(UData_AbilityRequiredInfo* requiredInfo) override;
 };

@@ -7,7 +7,7 @@
 #include "Ability_BasicPistol.generated.h"
 
 UCLASS(Blueprintable, BlueprintType)
-class TRUEPROJECT2_API AAbility_BasicPistol : public AGeneralAbilityClass
+class LIMITLESS_API AAbility_BasicPistol : public AGeneralAbilityClass
 {
 	GENERATED_BODY()
 	
@@ -21,17 +21,9 @@ protected:
 
 	// specific stats
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Stats")
-		FVector DistanceVector;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Stats")
-		float Distance;
-
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+		float MaxDistance = 3000.0f;
 
 public:	
-
-	virtual bool AbilityRequirement(UData_AbilityRequiredInfo* requiredInfo) override;
-	
 	virtual void ActivateAbilityEffect(UData_AbilityRequiredInfo* requiredInfo) override;
 
 	// virtual void ApplyDamageToEnemy(UData_AbilityRequiredInfo* requiredInfo) override;

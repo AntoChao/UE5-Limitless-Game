@@ -12,7 +12,7 @@ replace them to reverse Projectile and add impulse to them in reverse Direction.
 */
 
 UCLASS()
-class TRUEPROJECT2_API AAbility_ReversePorjectiles : public AGeneralAbilityClass
+class LIMITLESS_API AAbility_ReversePorjectiles : public AGeneralAbilityClass
 {
 	GENERATED_BODY()
 
@@ -21,19 +21,16 @@ public:
 	AAbility_ReversePorjectiles(const class FObjectInitializer& ObjectInitializer);
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
 	UFUNCTION(BlueprintCallable, Category = "Effect")
 		void ResetArrays();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effect")
-		TArray<class AActor*> ActorDetected;
+		TArray<class AActor*> ActorsDetected;
 	UFUNCTION(BlueprintCallable, Category = "Effect")
 		void GetAllEnemiesProjectiles(UData_AbilityRequiredInfo* requiredInfo);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effect")
-		float RadiusOfDetection = 1000.0f;
+		float RadiusOfDetection = 5000.0f;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effect")
 		TArray<class AWeapon_GProjectileClass*> EnemiesProjectiles = {};
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Effect")
@@ -47,7 +44,5 @@ protected:
 		TSubclassOf<class AWeapon_ReverseProjectile> Weapon_ReverseProjectileClass;
 
 public:	
-	virtual bool AbilityRequirement(UData_AbilityRequiredInfo* requiredInfo) override;
-
 	virtual void ActivateAbilityEffect(UData_AbilityRequiredInfo* requiredInfo) override;
 };

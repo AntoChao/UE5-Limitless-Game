@@ -11,7 +11,7 @@ This ability is just to spawm a black hole bomb with corresponding functionality
 */
 
 UCLASS()
-class TRUEPROJECT2_API AAbility_Sum_MomFoot : public AGeneralAbilityClass
+class LIMITLESS_API AAbility_Sum_MomFoot : public AGeneralAbilityClass
 {
 	GENERATED_BODY()
 	
@@ -20,9 +20,6 @@ public:
 	AAbility_Sum_MomFoot(const class FObjectInitializer& ObjectInitializer);
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
-
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MomFoot Class")
 		TSubclassOf<class AWeapon_MomFoot> AWeapon_MomFootClass;
 
@@ -46,7 +43,6 @@ protected:
 		bool ShotTheLineTraceCheck(FVector HitLocation);
 
 public:	
-	virtual bool AbilityRequirement(UData_AbilityRequiredInfo* requiredInfo) override;
 
 	virtual void ActivateAbilityEffect(UData_AbilityRequiredInfo* requiredInfo) override;
 };

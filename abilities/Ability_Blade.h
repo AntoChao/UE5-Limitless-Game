@@ -8,7 +8,7 @@
 #include "Ability_Blade.generated.h"
 
 UCLASS()
-class TRUEPROJECT2_API AAbility_Blade : public AGeneralAbilityClass
+class LIMITLESS_API AAbility_Blade : public AGeneralAbilityClass
 {
 	GENERATED_BODY()
 	
@@ -17,8 +17,6 @@ public:
 	AAbility_Blade(const class FObjectInitializer& ObjectInitializer);
 	
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
 		class AWeapon_Blade* WeaponBlade;
 
@@ -37,9 +35,6 @@ protected:
 	FTimerHandle ApplyEffectTimer;
 
 public:	
-
-	virtual bool AbilityRequirement(UData_AbilityRequiredInfo* requiredInfo) override;
-
 	virtual void ActivateAbilityEffect(UData_AbilityRequiredInfo* requiredInfo) override;
 
 

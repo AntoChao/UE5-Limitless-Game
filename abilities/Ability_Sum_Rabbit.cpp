@@ -14,30 +14,7 @@
 AAbility_Sum_Rabbit::AAbility_Sum_Rabbit(const class FObjectInitializer& ObjectInitializer)
 	:Super(ObjectInitializer)
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
 
-}
-
-// Called when the game starts or when spawned
-void AAbility_Sum_Rabbit::BeginPlay()
-{
-	Super::BeginPlay();
-	
-}
-
-bool AAbility_Sum_Rabbit::AbilityRequirement(UData_AbilityRequiredInfo* requiredInfo)
-{
-	if (requiredInfo->GetPlayerFrenzy() >= FrenzyCost->GetFrenzy())
-	{
-		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Yellow, TEXT("USING Bomb"));
-		return true;
-	}
-	else
-	{
-		return false;
-	}
-	
 }
 
 /*  ActivateAbilityEffect has 3 process
